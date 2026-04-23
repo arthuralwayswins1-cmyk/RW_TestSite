@@ -257,21 +257,66 @@ section {
 }
 
 /* === Mobile optimization pass === */
-@media (max-width: 640px) {
-  :root { --pad: 18px; --tilt: 0.4deg; }
-  section { padding-top: 48px !important; padding-bottom: 48px !important; }
+@media (max-width: 768px) {
+  :root { --pad: 18px; --tilt: 0.3deg; }
+
+  /* Stop 100vw horizontal scroll */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  * { max-width: 100%; }
+  img, svg, video { max-width: 100%; height: auto; display: block; }
+
+  /* Section padding */
+  section { padding-top: 56px !important; padding-bottom: 56px !important; }
   section[id] { scroll-margin-top: 64px; }
-  .wrap { padding-left: var(--pad); padding-right: var(--pad); }
-  [class*="grid"] { grid-template-columns: 1fr !important; }
-  svg { max-width: 100%; height: auto; }
-  p { font-size: 16px !important; line-height: 1.55 !important; }
-  .tape, .stamp { transform: none !important; }
+
+  /* Container padding — replaces 64px with 18px on sides */
+  .wrap { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
+
+  /* ALL multi-column grids stack */
+  [style*="gridTemplateColumns"],
+  [style*="grid-template-columns"],
+  .grid-2, .grid-3, .grid-4,
   .fields-grid, .faq-grid, .about-grid, .process-grid, .work-grid,
   .contact-grid, .tt-grid, .approach-top, .hero-grid, .footer-grid,
   .process-cta, .pillar-row {
-    grid-template-columns: 1fr !important; gap: 32px !important;
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
   }
-  .footer-grid { gap: 24px !important; }
+
+  /* Typography scaling */
+  p { font-size: 16px !important; line-height: 1.55 !important; }
+  h1, h2, h3 { letter-spacing: -0.01em !important; }
+
+  /* Remove wild rotations — they cause overflow */
+  [style*="rotate("] { transform: none !important; }
+  .tape, .stamp { transform: none !important; }
+
+  /* Browser chrome mocks — keep them contained */
+  .browser-chrome { width: 100% !important; max-width: 100% !important; }
+
+  /* Hero info bar — collapse 5 cols to 2x3 */
+  .hero-info-bar {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    margin-top: 32px !important;
+  }
+  .hero-info-bar .scroll-explore { display: none !important; }
+
+  /* Nav — mobile menu button visible; trim link group */
+  .nav-links { gap: 14px !important; font-size: 13px !important; }
+
+  /* Buttons */
+  .btn { padding: 12px 20px !important; font-size: 14px !important; }
+
+  /* Knowledge agent SVG — let it shrink */
+  svg[viewBox] { width: 100% !important; height: auto !important; }
+}
+
+@media (max-width: 480px) {
+  /* Ultra-narrow — collapse hero info bar too */
+  .hero-info-bar { grid-template-columns: 1fr !important; }
+  .nav-links { display: none !important; }
+  section { padding-top: 44px !important; padding-bottom: 44px !important; }
 }
 
 /* Links inline */
@@ -860,6 +905,7 @@ function Hero({
       color: "var(--ink)"
     }
   }, "Tools should fit the way you work. Not the other way around.")), /*#__PURE__*/React.createElement(HeroDiagram, null))), /*#__PURE__*/React.createElement("div", {
+    className: "hero-info-bar",
     style: {
       marginTop: 56,
       display: "grid",
@@ -902,6 +948,7 @@ function Hero({
       marginTop: 4
     }
   }, "Data, workflows, results.")), /*#__PURE__*/React.createElement("div", {
+    className: "scroll-explore",
     style: {
       justifySelf: "end",
       fontFamily: "var(--font-hand)",
