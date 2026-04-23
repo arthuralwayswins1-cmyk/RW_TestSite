@@ -256,6 +256,24 @@ section {
   body { font-size: 16px; }
 }
 
+/* === Mobile optimization pass === */
+@media (max-width: 640px) {
+  :root { --pad: 18px; --tilt: 0.4deg; }
+  section { padding-top: 48px !important; padding-bottom: 48px !important; }
+  section[id] { scroll-margin-top: 64px; }
+  .wrap { padding-left: var(--pad); padding-right: var(--pad); }
+  [class*="grid"] { grid-template-columns: 1fr !important; }
+  svg { max-width: 100%; height: auto; }
+  p { font-size: 16px !important; line-height: 1.55 !important; }
+  .tape, .stamp { transform: none !important; }
+  .fields-grid, .faq-grid, .about-grid, .process-grid, .work-grid,
+  .contact-grid, .tt-grid, .approach-top, .hero-grid, .footer-grid,
+  .process-cta, .pillar-row {
+    grid-template-columns: 1fr !important; gap: 32px !important;
+  }
+  .footer-grid { gap: 24px !important; }
+}
+
 /* Links inline */
 .ilink {
   border-bottom: 1px solid currentColor;
