@@ -310,6 +310,8 @@ section {
 
   /* Knowledge agent SVG — let it shrink */
   svg[viewBox] { width: 100% !important; height: auto !important; }
+  /* Except the RW logo mark — keep it small */
+  svg.rw-logo-mark { width: 72px !important; height: 66px !important; flex-shrink: 0; }
 }
 
 @media (max-width: 480px) {
@@ -3193,6 +3195,7 @@ function AboutNik() {
       color: "var(--clay)"
     }
   }, "Founder \xB7 RootWurx"), /*#__PURE__*/React.createElement("svg", {
+    className: "rw-logo-mark",
     viewBox: "0 0 80 72",
     width: "86",
     height: "78",
