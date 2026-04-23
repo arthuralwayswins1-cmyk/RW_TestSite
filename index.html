@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RootWurx — Tools and systems, built to fit.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;450;500;600;700&family=Instrument+Serif:ital@0;1&family=Caveat:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+/* RootWurx — design tokens */
+:root {
+  --forest: #1E3A2F;
+  --forest-deep: #132821;
+  --sage: #6B7F6E;
+  --sage-soft: #8A9B8D;
+  --clay: #C7623A;
+  --clay-soft: #D67E5A;
+  --paper: #F4F1E8;
+  --paper-warm: #EFEBDC;
+  --stone: #CEC8BD;
+  --stone-soft: #E0DBCF;
+  --ink: #1A1A1A;
+  --ink-soft: #2C2C2C;
+  --mute: #6B6B66;
+
+  --accent: var(--clay);
+
+  --font-display: "Literata", "Source Serif Pro", Georgia, serif;
+  --font-section: "Literata", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-hand: "Caveat", "Homemade Apple", cursive;
+  --font-italic: "Instrument Serif", "Literata", Georgia, serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  --tilt: 1deg;
+  --grain: 0.07;
+
+  --maxw: 1240px;
+  --pad: clamp(20px, 4vw, 64px);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: var(--grain);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* base type */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+  color: var(--ink);
+}
+.display em, .italic-hand {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--forest);
+  letter-spacing: -0.01em;
+}
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sage);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  width: 28px; height: 1px;
+  background: var(--sage);
+  display: inline-block;
+}
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  color: var(--forest);
+  font-size: 1.4em;
+  line-height: 1.1;
+}
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* underline accents — hand-drawn feel */
+.underline-hand {
+  position: relative;
+  display: inline-block;
+}
+.underline-hand::after {
+  content: "";
+  position: absolute;
+  left: -2%; right: -2%;
+  bottom: -0.05em;
+  height: 0.35em;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 7 Q 50 2 100 6 T 198 5' stroke='%236B9A5F' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* shared wrappers */
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+section {
+  position: relative;
+  padding-top: clamp(64px, 9vw, 120px);
+  padding-bottom: clamp(64px, 9vw, 120px);
+}
+.rule {
+  height: 1px;
+  background: var(--ink);
+  opacity: 0.12;
+  margin: 0;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--forest);
+  color: var(--paper);
+  border-color: var(--forest);
+}
+.btn-primary:hover { background: var(--forest-deep); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--paper); }
+.btn-link {
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 4px;
+  cursor: pointer;
+}
+
+/* Tape / sticker primitive */
+.tape {
+  position: relative;
+  background: #FFFCED;
+  padding: 14px 18px;
+  border: 1px solid rgba(26,26,26,0.08);
+  box-shadow: 0 1px 0 rgba(26,26,26,0.04), 0 8px 20px -12px rgba(26,26,26,0.2);
+  transform: rotate(calc(-0.8 * var(--tilt)));
+}
+.tape::before, .tape::after {
+  content: "";
+  position: absolute;
+  width: 44px; height: 14px;
+  background: rgba(199, 98, 58, 0.18);
+  border-left: 1px dashed rgba(199,98,58,0.3);
+  border-right: 1px dashed rgba(199,98,58,0.3);
+}
+.tape::before { top: -7px; left: 22px; transform: rotate(-3deg); }
+.tape::after  { bottom: -7px; right: 22px; transform: rotate(2deg); }
+
+/* Stamp */
+.stamp {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 2px solid var(--clay);
+  color: var(--clay);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: rotate(calc(-2.5 * var(--tilt)));
+  opacity: 0.85;
+}
+
+/* Torn edge (top/bottom decorative) */
+.torn-bottom {
+  position: relative;
+}
+.torn-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 14px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 14' preserveAspectRatio='none'><path d='M0 0 L0 8 L10 6 L25 10 L45 5 L70 12 L95 6 L120 9 L150 4 L180 11 L210 6 L240 10 L270 5 L300 12 L330 7 L360 9 L385 5 L400 10 L400 14 L0 14 Z' fill='%23F4F1E8'/></svg>") no-repeat;
+  background-size: 100% 100%;
+}
+
+/* Utility */
+.row { display: flex; }
+.col { display: flex; flex-direction: column; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.gap-8 { gap: 32px; }
+.center { align-items: center; justify-content: center; }
+
+/* Responsive helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 24px; }
+  body { font-size: 16px; }
+}
+
+/* Links inline */
+.ilink {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  transition: color 0.2s ease;
+}
+.ilink:hover { color: var(--clay); }
+
+/* Scroll target offset for sticky nav */
+section[id] { scroll-margin-top: 72px; }
+
+/* Print / reduced motion friendly */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+
+  <template id="__bundler_thumbnail" data-bg-color="#f4f1e8">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(600 400)" font-family="Georgia, serif" text-anchor="middle">
+        <text y="-20" font-size="180" font-weight="700" fill="#1e3a2f" font-style="italic">Wurx.</text>
+        <line x1="-220" y1="30" x2="220" y2="22" stroke="#c7623a" stroke-width="6" stroke-linecap="round"/>
+        <text y="100" font-size="34" letter-spacing="8" fill="#1e3a2f" font-family="Arial, sans-serif">ROOTWURX</text>
+      </g>
+    </svg>
+  </template>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+
+// ==== components/tweaks.jsx ====
+// Tweaks panel — user-configurable via toolbar toggle
+const { useState: useStateT, useEffect: useEffectT } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "clay",
+  "tilt": 1,
+  "grain": 0.07,
+  "headline": "default",
+  "dark_hero": false
+}/*EDITMODE-END*/;
+
+const ACCENT_PRESETS = {
+  clay:   "#C7623A",
+  sage:   "#6B7F6E",
+  forest: "#1E3A2F",
+  amber:  "#C9942F",
+};
+
+function applyTweaks(t) {
+  const r = document.documentElement;
+  r.style.setProperty("--accent", ACCENT_PRESETS[t.accent] || ACCENT_PRESETS.clay);
+  r.style.setProperty("--clay", ACCENT_PRESETS[t.accent] || ACCENT_PRESETS.clay);
+  r.style.setProperty("--tilt", `${t.tilt}deg`);
+  r.style.setProperty("--grain", String(t.grain));
+}
+
+function TweaksPanel({ active, tweaks, setTweaks }) {
+  if (!active) return null;
+  const set = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*");
+  };
+  const row = { display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 };
+  const label = { fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: "var(--mute)" };
+  return (
+    <div style={{
+      position: "fixed", bottom: 18, right: 18, zIndex: 200,
+      width: 280,
+      background: "#FFFCED",
+      border: "1px solid rgba(26,26,26,0.2)",
+      padding: "18px 18px 16px",
+      fontFamily: "var(--font-body)",
+      boxShadow: "0 20px 40px -20px rgba(26,26,26,0.35)",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>Tweaks</div>
+        <div className="mono-label">Live</div>
+      </div>
+
+      <div style={row}>
+        <span style={label}>Accent</span>
+        <div style={{ display: "flex", gap: 8 }}>
+          {Object.entries(ACCENT_PRESETS).map(([k, v]) => (
+            <button key={k} onClick={() => set("accent", k)} title={k}
+              style={{
+                width: 30, height: 30, borderRadius: "50%",
+                background: v,
+                border: tweaks.accent === k ? "2px solid var(--ink)" : "1px solid rgba(26,26,26,0.15)",
+                cursor: "pointer", padding: 0,
+              }} />
+          ))}
+        </div>
+      </div>
+
+      <div style={row}>
+        <span style={label}>Tilt ({tweaks.tilt.toFixed(1)}°)</span>
+        <input type="range" min="0" max="3" step="0.1" value={tweaks.tilt}
+          onChange={e => set("tilt", parseFloat(e.target.value))} />
+      </div>
+
+      <div style={row}>
+        <span style={label}>Grain ({tweaks.grain.toFixed(2)})</span>
+        <input type="range" min="0" max="0.2" step="0.01" value={tweaks.grain}
+          onChange={e => set("grain", parseFloat(e.target.value))} />
+      </div>
+
+      <div style={row}>
+        <span style={label}>Headline</span>
+        <select value={tweaks.headline} onChange={e => set("headline", e.target.value)}
+          style={{ padding: "6px 8px", fontFamily: "inherit", fontSize: 13, border: "1px solid rgba(26,26,26,0.2)", background: "#fff" }}>
+          <option value="default">We don't sell a product. We build yours.</option>
+          <option value="fit">Software that fits your team.</option>
+          <option value="quiet">The best system is the quiet one.</option>
+        </select>
+      </div>
+
+      <div style={{ fontFamily: "var(--font-hand)", fontSize: 16, color: "var(--sage)", marginTop: 8 }}>
+        Toggle Tweaks in the toolbar to hide.
+      </div>
+    </div>
+  );
+}
+
+function useTweaks() {
+  const [tweaks, setTweaks] = useStateT(TWEAK_DEFAULTS);
+  const [active, setActive] = useStateT(false);
+
+  useEffectT(() => {
+    const handler = (e) => {
+      const d = e.data;
+      if (!d || !d.type) return;
+      if (d.type === "__activate_edit_mode") setActive(true);
+      if (d.type === "__deactivate_edit_mode") setActive(false);
+    };
+    window.addEventListener("message", handler);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  useEffectT(() => { applyTweaks(tweaks); }, [tweaks]);
+
+  return { tweaks, setTweaks, active };
+}
+
+Object.assign(window, { TweaksPanel, useTweaks, TWEAK_DEFAULTS });
+
+
+// ==== components/hero.jsx ====
+// Nav + Hero
+const { useState, useEffect } = React;
+
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navStyle = {
+    position: "sticky", top: 0, zIndex: 50,
+    backdropFilter: scrolled ? "blur(10px)" : "none",
+    background: scrolled ? "rgba(244,241,232,0.88)" : "transparent",
+    borderBottom: scrolled ? "1px solid rgba(26,26,26,0.08)" : "1px solid transparent",
+    transition: "all 0.25s ease",
+  };
+
+  const links = [
+    ["Work", "#work"],
+    ["Approach", "#approach"],
+    ["Process", "#process"],
+    ["Fields", "#fields"],
+    ["About", "#about"],
+    ["FAQ", "#faq"],
+  ];
+
+  return (
+    <nav style={navStyle}>
+      <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px var(--pad)" }}>
+        <a href="#top" style={{ display: "inline-flex", alignItems: "baseline", gap: 0, fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em", position: "relative" }}>
+          <span>Root</span>
+          <span style={{ fontFamily: "var(--font-italic)", fontStyle: "italic", color: "var(--forest)", fontWeight: 400, position: "relative" }}>
+            Wurx
+            <span style={{
+              position: "absolute",
+              left: "-4%", right: "-4%",
+              bottom: "-6px",
+              height: 6,
+              background: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' preserveAspectRatio='none'><path d='M2 5 Q 15 1 30 4 T 58 3' stroke='%236B9A5F' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>\") no-repeat",
+              backgroundSize: "100% 100%",
+              pointerEvents: "none",
+            }} />
+          </span>
+        </a>
+        <div className="nav-links" style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          {links.map(([label, href]) => (
+            <a key={href} href={href} style={{ fontSize: 14, color: "var(--ink-soft)", fontWeight: 450 }}
+              onMouseEnter={e => e.currentTarget.style.color = "var(--clay)"}
+              onMouseLeave={e => e.currentTarget.style.color = "var(--ink-soft)"}>
+              {label}
+            </a>
+          ))}
+          <a href="#contact" className="btn btn-primary" style={{ padding: "10px 18px", fontSize: 14 }}>Book a free call</a>
+        </div>
+        <button className="nav-toggle" onClick={() => setOpen(!open)} style={{
+          display: "none", background: "none", border: "none", cursor: "pointer", fontSize: 22
+        }}>☰</button>
+      </div>
+      {open && (
+        <div style={{ padding: "0 var(--pad) 20px", display: "flex", flexDirection: "column", gap: 14, background: "var(--paper)" }}>
+          {links.map(([label, href]) => (
+            <a key={href} href={href} onClick={() => setOpen(false)} style={{ fontSize: 18 }}>{label}</a>
+          ))}
+          <a href="#contact" className="btn btn-primary" onClick={() => setOpen(false)}>Book a free call</a>
+        </div>
+      )}
+      <style>{`
+        @media (max-width: 860px) {
+          .nav-links { display: none !important; }
+          .nav-toggle { display: block !important; }
+        }
+      `}</style>
+    </nav>
+  );
+}
+
+function HeroDiagram() {
+  // Hand-drawn-feel connection diagram: DATA + PEOPLE + SYSTEMS → OUTCOMES
+  return (
+    <svg viewBox="0 0 420 300" style={{ width: "100%", height: "auto", maxWidth: 460 }} aria-hidden="true">
+      <defs>
+        <filter id="rough1">
+          <feTurbulence baseFrequency="0.06" numOctaves="2" seed="2" />
+          <feDisplacementMap in="SourceGraphic" scale="1.2" />
+        </filter>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L10 5 L0 10 z" fill="#1E3A2F" />
+        </marker>
+      </defs>
+      <g fontFamily="var(--font-mono), monospace" fontSize="11" letterSpacing="1" fill="#1E3A2F" filter="url(#rough1)">
+        {/* Boxes */}
+        <g stroke="#1E3A2F" strokeWidth="1.3" fill="none">
+          <rect x="30"  y="40"  width="110" height="48" />
+          <rect x="280" y="40"  width="110" height="48" />
+          <rect x="155" y="130" width="110" height="48" />
+          <rect x="155" y="230" width="110" height="48" />
+        </g>
+        <text x="85"  y="68"  textAnchor="middle" fontWeight="600">DATA</text>
+        <text x="335" y="68"  textAnchor="middle" fontWeight="600">SYSTEMS</text>
+        <text x="210" y="158" textAnchor="middle" fontWeight="600">PEOPLE</text>
+        <text x="210" y="258" textAnchor="middle" fontWeight="600">OUTCOMES</text>
+
+        {/* Connecting lines */}
+        <g stroke="#1E3A2F" strokeWidth="1.2" fill="none" markerEnd="url(#arrow)">
+          <path d="M 110 88 Q 150 110 180 130" />
+          <path d="M 320 88 Q 280 110 240 130" />
+          <path d="M 210 178 L 210 230" />
+        </g>
+
+        {/* Dashed side connection */}
+        <path d="M 140 64 Q 210 20 280 64" stroke="#C7623A" strokeWidth="1" strokeDasharray="4 3" fill="none" />
+
+        {/* Hand-drawn annotation */}
+        <text x="210" y="32" textAnchor="middle" fontFamily="var(--font-hand), cursive" fontSize="15" fill="#6B7F6E">
+          connected, not stacked
+        </text>
+      </g>
+    </svg>
+  );
+}
+
+function Hero({ headlineVariant }) {
+  const headlines = {
+    default: { a: "We don't sell", b: "a product.", c: "We build ", d: "yours." },
+    fit:     { a: "Software that", b: "fits your team.", c: "Not the ", d: "other way." },
+    quiet:   { a: "The best system", b: "is the quiet one.", c: "We build those ", d: "for you." },
+  };
+  const h = headlines[headlineVariant] || headlines.default;
+
+  return (
+    <section id="top" style={{ paddingTop: "40px", paddingBottom: "clamp(28px, 4vw, 56px)" }}>
+      <div className="wrap" style={{ position: "relative" }}>
+        {/* page meta */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 48 }}>
+          <span className="mono-label">Rax · 01 — Tools & Systems</span>
+          <span className="mono-label">AI-forward, not AI-first.</span>
+        </div>
+
+        <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1.3fr 0.9fr", gap: 48, alignItems: "start" }}>
+          <div>
+            <h1 className="display" style={{ fontSize: "clamp(52px, 8vw, 116px)", margin: 0 }}>
+              {h.a}<br/>
+              {h.b}<br/>
+              <span className="italic-hand">{h.c}<span className="underline-hand">{h.d}</span></span>
+            </h1>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(17px, 1.6vw, 21px)", color: "var(--forest)", marginTop: 24, fontWeight: 500, letterSpacing: "-0.005em" }}>
+              Custom AI agents & automations — <span style={{ fontFamily: "var(--font-italic)", fontStyle: "italic", fontWeight: 400 }}>built around how your team actually works.</span>
+            </div>
+            <p style={{ maxWidth: 520, marginTop: 36, fontSize: 19, lineHeight: 1.55, color: "var(--ink-soft)" }}>
+              Every business runs differently. Your AI and software should too.
+              <br/>
+              <strong style={{ fontWeight: 600 }}>RootWurx</strong> designs and builds custom AI agents, automations, and workflows — tailored precisely to how your team actually operates.
+            </p>
+            <div style={{ display: "flex", gap: 14, marginTop: 36, flexWrap: "wrap" }}>
+              <a href="#contact" className="btn btn-primary">Book a free call →</a>
+              <a href="#work" className="btn btn-ghost">See what we build</a>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 28, paddingTop: 20 }}>
+            <div className="tape" style={{ maxWidth: 260, alignSelf: "flex-end" }}>
+              <div className="mono-label" style={{ marginBottom: 6 }}>Principle</div>
+              <div style={{ fontFamily: "var(--font-hand)", fontSize: 22, lineHeight: 1.15, color: "var(--ink)" }}>
+                Tools should fit the way you work. Not the other way around.
+              </div>
+            </div>
+            <HeroDiagram />
+          </div>
+        </div>
+
+        {/* bottom strip */}
+        <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "auto auto auto auto 1fr", gap: 40, alignItems: "center", borderTop: "1px solid rgba(26,26,26,0.15)", paddingTop: 22 }}>
+          <div>
+            <div className="mono-label">One partner</div>
+            <div style={{ fontFamily: "var(--font-section)", fontSize: 15, marginTop: 4 }}>End-to-end.</div>
+          </div>
+          <div>
+            <div className="mono-label">No handoffs</div>
+            <div style={{ fontFamily: "var(--font-section)", fontSize: 15, marginTop: 4 }}>We operate it with you.</div>
+          </div>
+          <div>
+            <div className="mono-label">Pilot first</div>
+            <div style={{ fontFamily: "var(--font-section)", fontSize: 15, marginTop: 4 }}>See it before you pay.</div>
+          </div>
+          <div>
+            <div className="mono-label">You own it</div>
+            <div style={{ fontFamily: "var(--font-section)", fontSize: 15, marginTop: 4 }}>Data, workflows, results.</div>
+          </div>
+          <div style={{ justifySelf: "end", fontFamily: "var(--font-hand)", color: "var(--sage)", fontSize: 22 }}>
+            Scroll · Explore ↓
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+Object.assign(window, { Nav, Hero });
+
+
+// ==== components/work.jsx ====
+// Work — two live/in-build case studies + integrations strip
+const { useState: useStateWork } = React;
+
+function BrowserChrome({ children, title }) {
+  return (
+    <div style={{
+      background: "#fff",
+      borderRadius: 10,
+      border: "1px solid rgba(26,26,26,0.12)",
+      boxShadow: "0 30px 60px -30px rgba(26,26,26,0.25), 0 8px 20px -12px rgba(26,26,26,0.15)",
+      overflow: "hidden",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", background: "#F0EBE0", borderBottom: "1px solid rgba(26,26,26,0.08)" }}>
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#E06C5A" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#E6C26A" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#7FA368" }} />
+        <span style={{ marginLeft: 12, fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--mute)" }}>
+          {title}
+        </span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function InfluxLeadMock() {
+  // SMS conversation — a lead texts in; the AI agent responds instantly, qualifies, and books.
+  const messages = [
+    { from: "lead",  text: "Hey, do you guys do roof inspections? Had a leak last night.", time: "9:47 PM" },
+    { from: "agent", text: "Yes — sorry to hear that. I can get someone out fast. What's the address?", time: "9:47 PM" },
+    { from: "lead",  text: "1120 Maple Ave, Grand Rapids", time: "9:48 PM" },
+    { from: "agent", text: "Got it. A single-family home, or multi-unit?", time: "9:48 PM" },
+    { from: "lead",  text: "Single family. Two-story.", time: "9:49 PM" },
+    { from: "agent", text: "Perfect. I have tomorrow at 9:30 AM or Thursday at 2 PM. Which works?", time: "9:49 PM" },
+    { from: "lead",  text: "Tomorrow 9:30", time: "9:50 PM" },
+    { from: "agent", text: "Booked ✓ You'll get a confirmation text from Marco (our lead tech) in the morning. Anything else I should flag for him?", time: "9:50 PM" },
+  ];
+  const bubble = (m) => {
+    const isAgent = m.from === "agent";
+    return (
+      <div key={m.time + m.text} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 8 }}>
+        <div style={{
+          maxWidth: "78%",
+          background: isAgent ? "var(--forest)" : "#EAE6DA",
+          color: isAgent ? "var(--paper)" : "var(--ink)",
+          padding: "9px 13px",
+          borderRadius: 16,
+          borderBottomRightRadius: isAgent ? 4 : 16,
+          borderBottomLeftRadius: isAgent ? 16 : 4,
+          fontSize: 13.5,
+          lineHeight: 1.4,
+        }}>
+          {m.text}
+        </div>
+      </div>
+    );
+  };
+  return (
+    <BrowserChrome title="Lead Agent · live conversation">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", minHeight: 420 }}>
+        <div style={{ padding: "16px 18px 18px", background: "#FAF7EE", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 10, borderBottom: "1px solid rgba(26,26,26,0.08)", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#D6CFBF", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, color: "var(--forest)" }}>DM</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>Danielle M.</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--mute)" }}>+1 (616) 555 · 0142</div>
+              </div>
+            </div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: 1, textTransform: "uppercase", color: "#2E7D4F" }}>● Live</div>
+          </div>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            {messages.map(bubble)}
+          </div>
+          <div style={{ marginTop: 8, padding: "8px 12px", background: "#fff", border: "1px solid rgba(26,26,26,0.1)", borderRadius: 20, fontSize: 12.5, color: "var(--mute)", fontStyle: "italic" }}>
+            Agent drafting reply…
+          </div>
+        </div>
+        <aside style={{ background: "#fff", borderLeft: "1px solid rgba(26,26,26,0.08)", padding: "16px 14px" }}>
+          <div className="mono-label" style={{ marginBottom: 10 }}>Auto-qualified</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 12.5 }}>
+            <div><div style={{ color: "var(--mute)", fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Service</div><div>Roof inspection</div></div>
+            <div><div style={{ color: "var(--mute)", fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Address</div><div>1120 Maple Ave, GR</div></div>
+            <div><div style={{ color: "var(--mute)", fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Property</div><div>SFH · 2-story</div></div>
+            <div><div style={{ color: "var(--mute)", fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Appointment</div><div style={{ color: "var(--clay)", fontWeight: 600 }}>Tue 9:30 AM · Marco</div></div>
+            <div><div style={{ color: "var(--mute)", fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Status</div><div style={{ color: "#2E7D4F", fontWeight: 600 }}>Booked ✓</div></div>
+          </div>
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: "1px solid rgba(26,26,26,0.08)", fontFamily: "var(--font-hand)", fontSize: 18, color: "var(--sage)", lineHeight: 1.2 }}>
+            2 minute response.<br/>No human touched it.
+          </div>
+        </aside>
+      </div>
+    </BrowserChrome>
+  );
+}
+
+function CREMock() {
+  return (
+    <BrowserChrome title="cre.operating · internal">
+      <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", minHeight: 340 }}>
+        <aside style={{ background: "#132821", color: "#D7DAC7", padding: "18px 14px", display: "flex", flexDirection: "column", gap: 5 }}>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 600, marginBottom: 10, color: "#E6C26A" }}>CRE Ops</div>
+          {["Pipeline", "Deals", "Leases", "Commission", "Content", "Analytics", "Team"].map((l, i) => (
+            <div key={l} style={{
+              padding: "6px 10px",
+              fontSize: 13,
+              borderLeft: i === 0 ? "2px solid #E6C26A" : "2px solid transparent",
+              color: i === 0 ? "#F4F1E8" : "rgba(244,241,232,0.6)",
+            }}>{l}</div>
+          ))}
+        </aside>
+        <div style={{ padding: "18px 20px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 18, fontWeight: 600 }}>Pipeline Overview</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--mute)" }}>Q2 · 2026</div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+            {[["42", "Active Deals"], ["18", "Under Contract"], ["$24.7M", "Total Volume"]].map(([n, l]) => (
+              <div key={l}>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600 }}>{n}</div>
+                <div style={{ fontSize: 10.5, color: "var(--mute)", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: 1 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+          {/* Mini bar chart */}
+          <div style={{ marginTop: 18, display: "flex", alignItems: "flex-end", gap: 6, height: 78, borderBottom: "1px solid rgba(26,26,26,0.1)", paddingBottom: 4 }}>
+            {[0.4, 0.55, 0.3, 0.7, 0.5, 0.85, 0.62, 0.9, 0.7, 0.95, 0.8, 1].map((h, i) => (
+              <div key={i} style={{ flex: 1, height: `${h*100}%`, background: i === 11 ? "#C7623A" : "#6B7F6E", opacity: i === 11 ? 1 : 0.35 }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 14 }}>
+            {[
+              ["1210 Oak St",      "Under Contract", "#C7623A"],
+              ["Riverbend Plaza",  "Active",         "#2E7D4F"],
+              ["Maple Portfolio",  "Active",         "#2E7D4F"],
+              ["Sunset Retail",    "Due Diligence",  "#6B7F6E"],
+            ].map(([a, s, c], i) => (
+              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr auto", padding: "8px 0", borderBottom: "1px solid rgba(26,26,26,0.06)", fontSize: 13 }}>
+                <div>{a}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase", color: c }}>{s}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </BrowserChrome>
+  );
+}
+
+function KnowledgeAgentMock() {
+  // Hand-drawn-feel diagram: employee query → knowledge agent (pulls from sources) → grounded response.
+  // Match the tactile, sketched vibe of the other mocks but render in SVG for a pencil/ink feel.
+  return (
+    <div style={{
+      background: "#FDFAF0",
+      border: "1px solid rgba(26,26,26,0.12)",
+      borderRadius: 10,
+      boxShadow: "0 30px 60px -30px rgba(26,26,26,0.25), 0 8px 20px -12px rgba(26,26,26,0.15)",
+      padding: "18px 20px 22px",
+      backgroundImage: "linear-gradient(rgba(107,127,110,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(107,127,110,0.09) 1px, transparent 1px)",
+      backgroundSize: "22px 22px",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase", color: "var(--mute)" }}>
+        <span>Knowledge Agent · sketch</span>
+        <span style={{ color: "var(--clay)" }}>grounded ✓</span>
+      </div>
+      <svg viewBox="0 0 620 380" style={{ width: "100%", height: "auto", display: "block" }} aria-hidden="true">
+        <defs>
+          <filter id="ka-rough">
+            <feTurbulence baseFrequency="0.05" numOctaves="2" seed="7" />
+            <feDisplacementMap in="SourceGraphic" scale="1.2" />
+          </filter>
+        </defs>
+
+        {/* === LEFT: Employee query bubble === */}
+        <g filter="url(#ka-rough)">
+          <path d="M 20 40 L 200 40 Q 212 40 212 52 L 212 130 Q 212 142 200 142 L 70 142 L 50 158 L 55 142 L 32 142 Q 20 142 20 130 Z"
+                fill="#FFFCED" stroke="#1E3A2F" strokeWidth="1.3" />
+        </g>
+        <text x="34" y="62" fontFamily="var(--font-mono), monospace" fontSize="9" letterSpacing="1" fill="#6B7F6E">EMPLOYEE</text>
+        <foreignObject x="32" y="70" width="172" height="70">
+          <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontFamily: "var(--font-hand), cursive", fontSize: 14, lineHeight: 1.25, color: "#1A1A1A" }}>
+            “What’s our procedure when a client misses two payments?”
+          </div>
+        </foreignObject>
+
+        {/* === Arrow from query to agent === */}
+        <g filter="url(#ka-rough)" fill="none" stroke="#1E3A2F" strokeWidth="1.3" strokeLinecap="round">
+          <path d="M 215 95 Q 250 100 290 130" markerEnd="url(#ka-arrow)" />
+        </g>
+        <defs>
+          <marker id="ka-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L10 5 L0 10 z" fill="#1E3A2F" />
+          </marker>
+        </defs>
+        <text x="230" y="82" fontFamily="var(--font-hand), cursive" fontSize="13" fill="#C7623A" transform="rotate(-3, 230, 82)">asks</text>
+
+        {/* === CENTER: Knowledge Agent stamp === */}
+        <g filter="url(#ka-rough)">
+          <circle cx="330" cy="175" r="44" fill="#1E3A2F" stroke="#1E3A2F" strokeWidth="1.3" />
+          <circle cx="330" cy="175" r="38" fill="none" stroke="#F4F1E8" strokeWidth="0.8" strokeDasharray="2 3" />
+        </g>
+        <text x="330" y="170" textAnchor="middle" fontFamily="var(--font-display), serif" fontSize="22" fontWeight="600" fill="#F4F1E8" letterSpacing="-0.5">RW</text>
+        <text x="330" y="188" textAnchor="middle" fontFamily="var(--font-mono), monospace" fontSize="7.5" letterSpacing="2" fill="#B9C7A8">AGENT</text>
+
+        {/* === Source connections fanning into agent === */}
+        <g filter="url(#ka-rough)" fill="none" stroke="#6B7F6E" strokeWidth="1" strokeLinecap="round">
+          <path d="M 330 218 L 180 300" strokeDasharray="3 3" />
+          <path d="M 330 218 L 255 320" />
+          <path d="M 330 218 L 330 330" strokeDasharray="3 3" />
+          <path d="M 330 218 L 410 320" />
+          <path d="M 330 218 L 490 300" strokeDasharray="3 3" />
+        </g>
+
+        {/* === Source document icons === */}
+        {[
+          { x: 150, y: 300, label: "SOPs" },
+          { x: 225, y: 320, label: "Drive" },
+          { x: 300, y: 330, label: "CRM" },
+          { x: 380, y: 320, label: "Contracts" },
+          { x: 460, y: 300, label: "Pricing" },
+        ].map((s, i) => (
+          <g key={i} transform={`rotate(${(i-2)*2.5}, ${s.x+18}, ${s.y+18})`}>
+            <g filter="url(#ka-rough)">
+              <path d={`M ${s.x} ${s.y} L ${s.x+30} ${s.y} L ${s.x+36} ${s.y+6} L ${s.x+36} ${s.y+36} L ${s.x} ${s.y+36} Z`}
+                    fill="#FFFCED" stroke="#1E3A2F" strokeWidth="1.1" />
+              <path d={`M ${s.x+30} ${s.y} L ${s.x+30} ${s.y+6} L ${s.x+36} ${s.y+6}`} fill="none" stroke="#1E3A2F" strokeWidth="1" />
+              <path d={`M ${s.x+6} ${s.y+14} L ${s.x+28} ${s.y+14}`} stroke="#6B7F6E" strokeWidth="0.6" />
+              <path d={`M ${s.x+6} ${s.y+20} L ${s.x+30} ${s.y+20}`} stroke="#6B7F6E" strokeWidth="0.6" />
+              <path d={`M ${s.x+6} ${s.y+26} L ${s.x+22} ${s.y+26}`} stroke="#6B7F6E" strokeWidth="0.6" />
+            </g>
+            <text x={s.x+18} y={s.y+50} textAnchor="middle" fontFamily="var(--font-mono), monospace" fontSize="8.5" letterSpacing="1" fill="#1E3A2F">{s.label.toUpperCase()}</text>
+          </g>
+        ))}
+
+        {/* === Handwritten note: sources === */}
+        <text x="115" y="275" fontFamily="var(--font-hand), cursive" fontSize="14" fill="#6B7F6E" transform="rotate(-4, 115, 275)">your sources</text>
+
+        {/* === Arrow from agent to response === */}
+        <g filter="url(#ka-rough)" fill="none" stroke="#1E3A2F" strokeWidth="1.3" strokeLinecap="round">
+          <path d="M 374 150 Q 420 100 460 90" markerEnd="url(#ka-arrow)" />
+        </g>
+        <text x="375" y="78" fontFamily="var(--font-hand), cursive" fontSize="13" fill="#C7623A" transform="rotate(-8, 375, 78)">answers</text>
+
+        {/* === RIGHT: Response bubble === */}
+        <g filter="url(#ka-rough)">
+          <path d="M 425 40 L 600 40 Q 612 40 612 52 L 612 150 Q 612 162 600 162 L 480 162 L 465 178 L 470 162 L 437 162 Q 425 162 425 150 Z"
+                fill="#1E3A2F" stroke="#1E3A2F" strokeWidth="1.3" />
+        </g>
+        <text x="439" y="62" fontFamily="var(--font-mono), monospace" fontSize="9" letterSpacing="1" fill="#B9C7A8">AGENT · GROUNDED</text>
+        <foreignObject x="438" y="70" width="166" height="90">
+          <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontFamily: "var(--font-body), sans-serif", fontSize: 12, lineHeight: 1.35, color: "#F4F1E8" }}>
+            <div><strong style={{ color: "#E6C26A" }}>Per SOP 4.2:</strong> After two missed payments, send formal notice within 5 business days…</div>
+            <div style={{ marginTop: 6, fontSize: 10, color: "#B9C7A8", fontFamily: "var(--font-mono), monospace", letterSpacing: 0.5 }}>source: sops/collections.md</div>
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+  );
+}
+
+function CaseCard({ eyebrow, title, body, cta, children, meta, tilt, tools }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <span className="mono-label">{eyebrow}</span>
+        <span style={{ flex: 1, height: 1, background: "rgba(26,26,26,0.15)" }} />
+        <span className="mono-label" style={{ color: "var(--clay)" }}>{meta}</span>
+      </div>
+      <h3 className="display" style={{ fontSize: "clamp(26px, 3vw, 34px)", margin: 0, letterSpacing: "-0.01em" }}>{title}</h3>
+      <div style={{ transform: `rotate(calc(${tilt} * var(--tilt)))`, transformOrigin: "center", marginTop: 6 }}>
+        {children}
+      </div>
+      <p style={{ margin: "10px 0 0", color: "var(--ink-soft)", fontSize: 16, maxWidth: 540 }}>{body}</p>
+      {tools && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+          <span className="mono-label" style={{ alignSelf: "center", marginRight: 4 }}>Runs on</span>
+          {tools.map(t => (
+            <span key={t} style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase",
+              padding: "5px 9px",
+              border: "1px solid rgba(26,26,26,0.2)",
+              color: "var(--ink-soft)",
+            }}>{t}</span>
+          ))}
+        </div>
+      )}
+      {cta && (
+        <a href={cta.href} className="btn-link" style={{ alignSelf: "flex-start" }} target={cta.external ? "_blank" : undefined} rel="noreferrer">
+          {cta.label} →
+        </a>
+      )}
+    </div>
+  );
+}
+
+function IntegrationsStrip() {
+  const names = [
+    "Slack", "Google Workspace", "Microsoft Teams", "Follow Up Boss", "Twilio",
+    "Canva", "Power BI", "Google Business Profile", "Instagram", "LinkedIn",
+  ];
+  return (
+    <div style={{ borderTop: "1px solid rgba(26,26,26,0.15)", borderBottom: "1px solid rgba(26,26,26,0.15)", padding: "28px 0", marginTop: 48, overflow: "hidden" }}>
+      <div className="wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, flexWrap: "wrap", gap: 14 }}>
+        <div>
+          <div className="mono-label">Connects with the tools you already use</div>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 22, marginTop: 6 }}>
+            One source. <em style={{ fontFamily: "var(--font-italic)", color: "var(--forest)" }}>Everything connected.</em>
+          </div>
+        </div>
+        <div style={{ fontFamily: "var(--font-hand)", color: "var(--sage)", fontSize: 22 }}>— and more.</div>
+      </div>
+      <div className="wrap" style={{ display: "flex", flexWrap: "wrap", gap: "16px 28px", fontFamily: "var(--font-section)", fontSize: 17, color: "var(--ink-soft)" }}>
+        {names.map((n, i) => (
+          <React.Fragment key={n}>
+            <span>{n}</span>
+            {i < names.length - 1 && <span style={{ color: "var(--clay)", opacity: 0.6 }}>·</span>}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Work() {
+  return (
+    <section id="work">
+      <div className="wrap">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 48 }}>
+          <div>
+            <div className="eyebrow">Work in the ground</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 72px)", margin: "18px 0 0" }}>
+              What we're running <span className="italic-hand">right now.</span>
+            </h2>
+          </div>
+          <p style={{ maxWidth: 420, color: "var(--ink-soft)", fontSize: 17, margin: 0 }}>
+            Three examples pulled from active work — each built the same way, around the people who actually use them.
+          </p>
+        </div>
+
+        <div className="work-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56 }}>
+          <CaseCard
+            eyebrow="Engagement · 01"
+            meta="Shipping"
+            tilt="-0.5"
+            title="AI Lead Intake Agent"
+            body="Built for local service businesses. An inbound lead agent that responds instantly over SMS and qualifies around the clock, paired with an automated Google review system that builds your reputation on its own. No more missed leads. No more chasing reviews."
+            tools={["Twilio", "Google Business Profile", "Calendar"]}
+          >
+            <InfluxLeadMock />
+          </CaseCard>
+
+          <CaseCard
+            eyebrow="Engagement · 02"
+            meta="In Build · Confidential"
+            tilt="0.8"
+            title="CRE Operating Platform"
+            body="In build with a top commercial brokerage team in Florida. A phased platform — content automation, lease intelligence, a deal portal with commission management, and executive analytics. Running through the tools their team already uses."
+            tools={["Slack", "Follow Up Boss", "Google Drive", "Canva", "Power BI"]}
+          >
+            <CREMock />
+          </CaseCard>
+
+          <div className="third-case" style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "center" }}>
+            <div style={{ maxWidth: 640, width: "100%" }}>
+              <CaseCard
+                eyebrow="Engagement · 03"
+                meta="In Build · Confidential"
+                tilt="-0.6"
+                title="Company Knowledge Agent"
+                body="A private AI assistant trained on your business — your SOPs, pricing, protocols, and internal knowledge. Employees ask, it answers — grounded in your actual documentation, not the public internet. New hires ramp faster, senior staff stop getting interrupted, and nothing walks out the door when someone leaves."
+                tools={["Google Drive", "Notion", "Slack", "CRM"]}
+              >
+                <KnowledgeAgentAnimated />
+              </CaseCard>
+            </div>
+          </div>
+        </div>
+
+        {/* signature footer for section */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40, marginTop: 56, paddingTop: 36, borderTop: "1px solid rgba(26,26,26,0.15)" }} className="work-badges">
+          {[
+            ["Built for your workflow", "Not off the shelf."],
+            ["AI that fits how you work", "From the ground up."],
+            ["One source, everything connected", "No more tab-hopping."],
+          ].map(([t, s]) => (
+            <div key={t}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 600, letterSpacing: "-0.005em" }}>{t}</div>
+              <div style={{ fontFamily: "var(--font-hand)", fontSize: 22, color: "var(--sage)", marginTop: 4 }}>{s}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <IntegrationsStrip />
+
+      <style>{`
+        @media (max-width: 900px) {
+          .work-grid { grid-template-columns: 1fr !important; gap: 56px !important; }
+          .work-badges { grid-template-columns: 1fr !important; gap: 20px !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+Object.assign(window, { Work });
+
+
+// ==== components/knowledge-agent-animated.jsx ====
+// Animated Knowledge Agent demo — cycles through scripted Q&A scenarios.
+// Replaces the static KnowledgeAgentMock. Pauses on hover.
+
+function KnowledgeAgentAnimated() {
+  const scenarios = [
+    {
+      question: "What's our procedure when a client misses two payments?",
+      sources: [
+        { label: "SOPs",      highlight: true  },
+        { label: "Drive",     highlight: false },
+        { label: "CRM",       highlight: true  },
+        { label: "Contracts", highlight: false },
+        { label: "Pricing",   highlight: false },
+      ],
+      response: {
+        lead: "Per SOP 4.2:",
+        body: "After two missed payments, send formal notice within 5 business days, then pause service on day 10 if unresolved.",
+        cite: "source: sops/collections.md",
+      },
+    },
+    {
+      question: "What's the current pricing tier for enterprise clients?",
+      sources: [
+        { label: "SOPs",      highlight: false },
+        { label: "Drive",     highlight: true  },
+        { label: "CRM",       highlight: false },
+        { label: "Contracts", highlight: true  },
+        { label: "Pricing",   highlight: true  },
+      ],
+      response: {
+        lead: "Enterprise tier (2025):",
+        body: "$4,800/mo base + $120 per seat over 25. Volume discount kicks in at 100 seats. Last updated Q3.",
+        cite: "source: pricing/2025-tiers.md",
+      },
+    },
+    {
+      question: "Who approved the Henderson contract changes?",
+      sources: [
+        { label: "SOPs",      highlight: false },
+        { label: "Drive",     highlight: false },
+        { label: "CRM",       highlight: true  },
+        { label: "Contracts", highlight: true  },
+        { label: "Pricing",   highlight: false },
+      ],
+      response: {
+        lead: "Approved by M. Torres:",
+        body: "Contract v3 signed Nov 14. Changed payment terms net-30 → net-45 and added exclusivity clause for regional market.",
+        cite: "source: contracts/henderson-v3.pdf",
+      },
+    },
+  ];
+
+  // Phase progression per scenario (ms, cumulative)
+  const TYPE_Q_END    = 2200;   // question typed
+  const ASKS_END      = 2800;   // asks arrow shown
+  const SOURCES_START = 3000;
+  const SOURCES_STEP  = 380;    // per-source stagger
+  const SOURCES_END   = SOURCES_START + SOURCES_STEP * 5; // 4900
+  const ANSWERS_END   = 5400;
+  const TYPE_A_START  = 5500;
+  const TYPE_A_END    = 9500;   // response typed
+  const HOLD_END      = 12500;  // total scenario length
+  const FADE_MS       = 600;
+
+  const [idx, setIdx]       = React.useState(0);
+  const [phase, setPhase]   = React.useState(0); // ms within scenario
+  const [paused, setPaused] = React.useState(false);
+  const [visible, setVisible] = React.useState(true);
+
+  React.useEffect(() => {
+    if (paused) return;
+    let raf;
+    let start = performance.now();
+    const tick = (t) => {
+      const elapsed = t - start;
+      setPhase(elapsed);
+      if (elapsed >= HOLD_END) {
+        // fade out
+        setVisible(false);
+        setTimeout(() => {
+          setIdx((i) => (i + 1) % scenarios.length);
+          setPhase(0);
+          start = performance.now();
+          setVisible(true);
+        }, FADE_MS);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [idx, paused]);
+
+  const scenario = scenarios[idx];
+
+  // Typewriter for question
+  const qChars = Math.max(0, Math.min(scenario.question.length, Math.floor((phase / TYPE_Q_END) * scenario.question.length)));
+  const questionText = scenario.question.slice(0, qChars);
+  const questionTyping = phase < TYPE_Q_END;
+
+  // Asks arrow
+  const asksShown = phase > TYPE_Q_END;
+
+  // Stamp active when asks arrow appears
+  const stampActive = phase > TYPE_Q_END + 200;
+
+  // Sources: each appears at SOURCES_START + i*STEP
+  const sourceVisible = (i) => phase > SOURCES_START + i * SOURCES_STEP;
+
+  // Answers arrow
+  const answersShown = phase > ANSWERS_END;
+
+  // Typewriter for response body
+  const fullResponse = scenario.response.body;
+  const aChars = Math.max(0, Math.min(fullResponse.length, Math.floor(((phase - TYPE_A_START) / (TYPE_A_END - TYPE_A_START)) * fullResponse.length)));
+  const responseText = phase > TYPE_A_START ? fullResponse.slice(0, aChars) : "";
+  const responseTyping = phase > TYPE_A_START && phase < TYPE_A_END;
+  const leadShown = phase > TYPE_A_START - 200;
+  const citeShown = phase > TYPE_A_END + 100;
+
+  const fadeStyle = {
+    opacity: visible ? 1 : 0,
+    transition: `opacity ${FADE_MS}ms ease`,
+  };
+
+  // Source positions (matches original layout)
+  const sourcePositions = [
+    { x: 150, y: 300 },
+    { x: 225, y: 320 },
+    { x: 300, y: 330 },
+    { x: 380, y: 320 },
+    { x: 460, y: 300 },
+  ];
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      style={{
+        position: "relative",
+        background: "#FBF7E9",
+        border: "1px solid rgba(26,26,26,0.12)",
+        padding: "18px 20px 22px",
+        boxShadow: "0 18px 34px -22px rgba(26,26,26,0.25)",
+        backgroundImage: `
+          linear-gradient(rgba(107,127,110,0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(107,127,110,0.08) 1px, transparent 1px)
+        `,
+        backgroundSize: "22px 22px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase", color: "var(--mute)" }}>
+        <span>Knowledge Agent · live sketch</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: "50%",
+            background: paused ? "#C7623A" : "#6B9A5F",
+            boxShadow: paused ? "none" : "0 0 0 3px rgba(107,154,95,0.25)",
+            animation: paused ? "none" : "ka-pulse 1.4s ease-in-out infinite",
+          }} />
+          <span style={{ color: paused ? "var(--clay)" : "var(--forest)" }}>{paused ? "paused" : "grounded ✓"}</span>
+        </span>
+      </div>
+
+      <div style={fadeStyle}>
+        <svg viewBox="0 0 620 380" style={{ width: "100%", height: "auto", display: "block" }} aria-hidden="true">
+          <defs>
+            <filter id="ka-rough-anim">
+              <feTurbulence baseFrequency="0.05" numOctaves="2" seed="7" />
+              <feDisplacementMap in="SourceGraphic" scale="1.2" />
+            </filter>
+            <marker id="ka-arrow-anim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L10 5 L0 10 z" fill="#1E3A2F" />
+            </marker>
+          </defs>
+
+          {/* === LEFT: Employee query bubble === */}
+          <g filter="url(#ka-rough-anim)">
+            <path d="M 20 40 L 200 40 Q 212 40 212 52 L 212 130 Q 212 142 200 142 L 70 142 L 50 158 L 55 142 L 32 142 Q 20 142 20 130 Z"
+                  fill="#FFFCED" stroke="#1E3A2F" strokeWidth="1.3" />
+          </g>
+          <text x="34" y="62" fontFamily="var(--font-mono), monospace" fontSize="9" letterSpacing="1" fill="#6B7F6E">EMPLOYEE</text>
+          <foreignObject x="32" y="70" width="172" height="70">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontFamily: "var(--font-hand), cursive", fontSize: 14, lineHeight: 1.25, color: "#1A1A1A" }}>
+              &ldquo;{questionText}{questionTyping && <span className="ka-caret">▌</span>}&rdquo;
+            </div>
+          </foreignObject>
+
+          {/* === Arrow from query to agent === */}
+          <g filter="url(#ka-rough-anim)" fill="none" stroke="#1E3A2F" strokeWidth="1.3" strokeLinecap="round" style={{ opacity: asksShown ? 1 : 0, transition: "opacity 250ms ease" }}>
+            <path d="M 215 95 Q 250 100 290 130" markerEnd="url(#ka-arrow-anim)" />
+          </g>
+          <text x="230" y="82" fontFamily="var(--font-hand), cursive" fontSize="13" fill="#C7623A" transform="rotate(-3, 230, 82)" style={{ opacity: asksShown ? 1 : 0, transition: "opacity 250ms ease" }}>asks</text>
+
+          {/* === CENTER: Knowledge Agent stamp === */}
+          <g filter="url(#ka-rough-anim)" style={{
+            transformOrigin: "330px 175px",
+            transform: stampActive ? "scale(1)" : "scale(0.9)",
+            transition: "transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}>
+            <circle cx="330" cy="175" r="44" fill="#1E3A2F" stroke="#1E3A2F" strokeWidth="1.3" />
+            <circle cx="330" cy="175" r="38" fill="none" stroke="#F4F1E8" strokeWidth="0.8" strokeDasharray="2 3"
+              style={{ animation: stampActive && !paused ? "ka-spin 12s linear infinite" : "none", transformOrigin: "330px 175px" }} />
+          </g>
+          <text x="330" y="170" textAnchor="middle" fontFamily="var(--font-display), serif" fontSize="22" fontWeight="600" fill="#F4F1E8" letterSpacing="-0.5">RW</text>
+          <text x="330" y="188" textAnchor="middle" fontFamily="var(--font-mono), monospace" fontSize="7.5" letterSpacing="2" fill="#B9C7A8">AGENT</text>
+
+          {/* === Source connections fanning into agent === */}
+          {sourcePositions.map((p, i) => {
+            const shown = sourceVisible(i);
+            const highlight = scenario.sources[i].highlight;
+            return (
+              <g key={`line-${i}`} filter="url(#ka-rough-anim)" fill="none"
+                 stroke={highlight ? "#2E5D3F" : "#6B7F6E"}
+                 strokeWidth={highlight ? 1.4 : 1}
+                 strokeLinecap="round"
+                 strokeDasharray={highlight ? "none" : "3 3"}
+                 style={{ opacity: shown ? (highlight ? 1 : 0.55) : 0, transition: "opacity 400ms ease" }}>
+                <path d={`M 330 218 L ${p.x + 18} ${p.y}`} />
+              </g>
+            );
+          })}
+
+          {/* === Source document icons === */}
+          {sourcePositions.map((p, i) => {
+            const shown = sourceVisible(i);
+            const src = scenario.sources[i];
+            const highlight = src.highlight;
+            return (
+              <g key={`src-${i}`}
+                 transform={`rotate(${(i-2)*2.5}, ${p.x+18}, ${p.y+18})`}
+                 style={{
+                   opacity: shown ? 1 : 0,
+                   transform: `${shown ? "translateY(0)" : "translateY(10px)"} rotate(${(i-2)*2.5}deg)`,
+                   transformBox: "fill-box",
+                   transformOrigin: "center",
+                   transition: "opacity 400ms ease, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+                 }}>
+                <g filter="url(#ka-rough-anim)">
+                  <path d={`M ${p.x} ${p.y} L ${p.x+30} ${p.y} L ${p.x+36} ${p.y+6} L ${p.x+36} ${p.y+36} L ${p.x} ${p.y+36} Z`}
+                        fill={highlight ? "#E8EFDF" : "#FFFCED"}
+                        stroke={highlight ? "#2E5D3F" : "#1E3A2F"}
+                        strokeWidth={highlight ? 1.4 : 1.1} />
+                  <path d={`M ${p.x+30} ${p.y} L ${p.x+30} ${p.y+6} L ${p.x+36} ${p.y+6}`} fill="none" stroke={highlight ? "#2E5D3F" : "#1E3A2F"} strokeWidth="1" />
+                  <path d={`M ${p.x+6} ${p.y+14} L ${p.x+28} ${p.y+14}`} stroke="#6B7F6E" strokeWidth="0.6" />
+                  <path d={`M ${p.x+6} ${p.y+20} L ${p.x+30} ${p.y+20}`} stroke="#6B7F6E" strokeWidth="0.6" />
+                  <path d={`M ${p.x+6} ${p.y+26} L ${p.x+22} ${p.y+26}`} stroke="#6B7F6E" strokeWidth="0.6" />
+                </g>
+                <text x={p.x+18} y={p.y+50} textAnchor="middle"
+                  fontFamily="var(--font-mono), monospace" fontSize="8.5" letterSpacing="1"
+                  fill={highlight ? "#2E5D3F" : "#1E3A2F"}
+                  fontWeight={highlight ? 700 : 400}>
+                  {src.label.toUpperCase()}
+                </text>
+                {highlight && (
+                  <circle cx={p.x+4} cy={p.y+4} r="3" fill="#C7623A">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="1.6s" repeatCount="indefinite" />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
+
+          {/* === Handwritten note: sources === */}
+          <text x="115" y="275" fontFamily="var(--font-hand), cursive" fontSize="14" fill="#6B7F6E"
+            transform="rotate(-4, 115, 275)"
+            style={{ opacity: phase > SOURCES_START + 200 ? 1 : 0, transition: "opacity 400ms ease" }}>
+            your sources
+          </text>
+
+          {/* === Arrow from agent to response === */}
+          <g filter="url(#ka-rough-anim)" fill="none" stroke="#1E3A2F" strokeWidth="1.3" strokeLinecap="round"
+             style={{ opacity: answersShown ? 1 : 0, transition: "opacity 250ms ease" }}>
+            <path d="M 374 150 Q 420 100 460 90" markerEnd="url(#ka-arrow-anim)" />
+          </g>
+          <text x="375" y="78" fontFamily="var(--font-hand), cursive" fontSize="13" fill="#C7623A"
+            transform="rotate(-8, 375, 78)"
+            style={{ opacity: answersShown ? 1 : 0, transition: "opacity 250ms ease" }}>
+            answers
+          </text>
+
+          {/* === RIGHT: Response bubble === */}
+          <g filter="url(#ka-rough-anim)">
+            <path d="M 425 40 L 600 40 Q 612 40 612 52 L 612 178 Q 612 190 600 190 L 480 190 L 465 206 L 470 190 L 437 190 Q 425 190 425 178 Z"
+                  fill="#1E3A2F" stroke="#1E3A2F" strokeWidth="1.3" />
+          </g>
+          <text x="439" y="62" fontFamily="var(--font-mono), monospace" fontSize="9" letterSpacing="1" fill="#B9C7A8">AGENT · GROUNDED</text>
+          <foreignObject x="438" y="70" width="166" height="120">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontFamily: "var(--font-body), sans-serif", fontSize: 12, lineHeight: 1.35, color: "#F4F1E8" }}>
+              <div style={{ opacity: leadShown ? 1 : 0, transition: "opacity 300ms ease" }}>
+                <strong style={{ color: "#E6C26A" }}>{scenario.response.lead}</strong>{" "}
+                {responseText}{responseTyping && <span className="ka-caret" style={{ color: "#F4F1E8" }}>▌</span>}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: "#B9C7A8", fontFamily: "var(--font-mono), monospace", letterSpacing: 0.5, opacity: citeShown ? 1 : 0, transition: "opacity 300ms ease" }}>
+                {scenario.response.cite}
+              </div>
+            </div>
+          </foreignObject>
+        </svg>
+      </div>
+
+      {/* Scenario dots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 8 }}>
+        {scenarios.map((_, i) => (
+          <button key={i}
+            onClick={() => { setIdx(i); setPhase(0); setVisible(true); }}
+            aria-label={`Scenario ${i+1}`}
+            style={{
+              width: i === idx ? 24 : 8,
+              height: 6,
+              borderRadius: 3,
+              border: "none",
+              background: i === idx ? "var(--forest)" : "rgba(26,26,26,0.2)",
+              cursor: "pointer",
+              padding: 0,
+              transition: "width 300ms ease, background 300ms ease",
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes ka-pulse {
+          0%, 100% { box-shadow: 0 0 0 3px rgba(107,154,95,0.25); }
+          50%      { box-shadow: 0 0 0 6px rgba(107,154,95,0.05); }
+        }
+        @keyframes ka-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        .ka-caret {
+          display: inline-block;
+          animation: ka-blink 0.9s steps(2) infinite;
+          color: #6B7F6E;
+          margin-left: 1px;
+        }
+        @keyframes ka-blink {
+          0%, 50% { opacity: 1; }
+          50.01%, 100% { opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+Object.assign(window, { KnowledgeAgentAnimated });
+
+
+// ==== components/approach.jsx ====
+// Approach (philosophy) + Process
+function RootsDiagram() {
+  // Computer on a desk. Fiber optic cables descend from the computer, cross the
+  // desk edge, and below the ground line they become tangled roots. The
+  // metaphor: your clean surface depends on messy, invisible infrastructure.
+  return (
+    <svg viewBox="0 0 440 460" style={{ width: "100%", height: "auto", maxWidth: 420 }} aria-hidden="true">
+      <defs>
+        <filter id="rough-roots">
+          <feTurbulence baseFrequency="0.04" numOctaves="2" seed="5" />
+          <feDisplacementMap in="SourceGraphic" scale="1.2" />
+        </filter>
+        <filter id="rough-roots-lg">
+          <feTurbulence baseFrequency="0.04" numOctaves="2" seed="6" />
+          <feDisplacementMap in="SourceGraphic" scale="2" />
+        </filter>
+      </defs>
+
+      {/* === ABOVE GROUND: desk + computer === */}
+      <g filter="url(#rough-roots)" fill="none" strokeLinecap="round">
+
+        {/* Monitor body */}
+        <rect x="130" y="30" width="180" height="118" rx="4" stroke="#1E3A2F" strokeWidth="1.5" fill="#FFFCED" />
+        {/* Monitor inner bezel */}
+        <rect x="140" y="40" width="160" height="90" stroke="#1E3A2F" strokeWidth="0.8" fill="#F4F1E8" />
+
+        {/* Monitor stand neck */}
+        <path d="M 220 148 L 220 178" stroke="#1E3A2F" strokeWidth="1.5" />
+        {/* Monitor foot */}
+        <path d="M 180 180 L 260 180" stroke="#1E3A2F" strokeWidth="1.5" />
+        <path d="M 200 178 Q 220 182 240 178" stroke="#1E3A2F" strokeWidth="1" />
+
+        {/* Screen content — hint of a dashboard */}
+        <g stroke="#6B7F6E" strokeWidth="0.8" opacity="0.75">
+          <path d="M 150 54 L 220 54" />
+          <path d="M 150 62 L 200 62" strokeDasharray="2 2" />
+          <path d="M 150 78 L 180 78 L 180 118 L 150 118 Z" />
+          <path d="M 190 78 L 230 78 L 230 118 L 190 118 Z" />
+          <path d="M 240 78 L 290 78 L 290 118 L 240 118 Z" />
+        </g>
+        {/* little "live" dot */}
+        <circle cx="288" cy="50" r="2.2" fill="#C7623A" stroke="none" />
+
+        {/* Desk surface */}
+        <path d="M 60 200 L 380 200" stroke="#1E3A2F" strokeWidth="1.8" />
+        {/* Desk front edge shading */}
+        <path d="M 70 205 L 370 205" stroke="#1E3A2F" strokeWidth="0.6" opacity="0.4" />
+        {/* Desk legs */}
+        <path d="M 90 200 L 90 250" stroke="#1E3A2F" strokeWidth="1.4" />
+        <path d="M 350 200 L 350 250" stroke="#1E3A2F" strokeWidth="1.4" />
+
+        {/* Small object on desk (coffee cup hint) */}
+        <g stroke="#6B7F6E" strokeWidth="1" opacity="0.7">
+          <path d="M 100 185 L 100 200 L 120 200 L 120 185 Z" />
+          <path d="M 120 189 Q 126 192 120 196" />
+        </g>
+
+        {/* Cables emerging from back of monitor, running behind desk */}
+        <g stroke="#1E3A2F" strokeWidth="1.4">
+          <path d="M 200 148 Q 195 170 190 200" />
+          <path d="M 220 148 Q 218 170 216 200" />
+          <path d="M 240 148 Q 245 170 250 200" />
+        </g>
+        {/* Accent (clay) fiber strand */}
+        <path d="M 210 148 Q 206 172 204 200" stroke="#C7623A" strokeWidth="1" opacity="0.8" strokeDasharray="3 3" fill="none" />
+      </g>
+
+      {/* === GROUND LINE === */}
+      <g>
+        <path d="M 10 250 L 430 250" stroke="#6B7F6E" strokeWidth="1" strokeDasharray="3 4" opacity="0.7" fill="none" />
+        {/* tiny tufts of "grass" */}
+        <g stroke="#6B7F6E" strokeWidth="0.7" opacity="0.6" fill="none">
+          <path d="M 40 250 L 40 246" />
+          <path d="M 55 250 L 55 244" />
+          <path d="M 160 250 L 160 245" />
+          <path d="M 300 250 L 300 246" />
+          <path d="M 390 250 L 390 244" />
+        </g>
+      </g>
+
+      {/* === BELOW GROUND: fibers become roots === */}
+      <g filter="url(#rough-roots-lg)" fill="none" strokeLinecap="round">
+        {/* Main trunk: cables continue down, then spread */}
+        <g stroke="#1E3A2F" strokeWidth="1.3">
+          {/* continuation of center three cables, spreading */}
+          <path d="M 190 250 Q 160 290 130 320 Q 90 355 60 400" />
+          <path d="M 195 250 Q 180 300 160 340 Q 140 380 120 420" />
+          <path d="M 205 250 Q 205 310 205 420" />
+          <path d="M 216 250 Q 230 300 250 340 Q 270 380 290 420" />
+          <path d="M 250 250 Q 275 290 305 320 Q 345 355 380 400" />
+        </g>
+
+        {/* Clay (accent) root strand continuation */}
+        <g stroke="#C7623A" strokeWidth="1" opacity="0.8">
+          <path d="M 204 250 Q 170 300 140 340 Q 110 380 90 415" strokeDasharray="3 3" />
+          <path d="M 220 250 Q 260 300 300 340 Q 335 375 360 410" strokeDasharray="3 3" />
+        </g>
+
+        {/* Fine root fibers */}
+        <g stroke="#6B7F6E" strokeWidth="0.7" opacity="0.7">
+          <path d="M 130 320 Q 115 335 108 360" />
+          <path d="M 160 340 Q 150 360 144 385" />
+          <path d="M 250 340 Q 262 360 268 385" />
+          <path d="M 305 320 Q 325 335 332 360" />
+          <path d="M 90 390 Q 78 405 72 420" />
+          <path d="M 360 390 Q 372 405 378 420" />
+        </g>
+      </g>
+
+      {/* Labels */}
+      <g fontFamily="var(--font-mono), monospace" fontSize="9" fill="#1E3A2F" letterSpacing="1">
+        <text x="220" y="22" textAnchor="middle" fill="#6B7F6E">WHAT YOU SEE</text>
+        <text x="220" y="237" textAnchor="middle" fill="#6B7F6E">— WHAT MAKES IT WORK —</text>
+      </g>
+
+      {/* Handwritten annotations */}
+      <text x="340" y="170" fontFamily="var(--font-hand), cursive" fontSize="17" fill="#C7623A" transform="rotate(-3, 340, 170)">
+        clean surface
+      </text>
+      <text x="30" y="370" fontFamily="var(--font-hand), cursive" fontSize="16" fill="#6B7F6E" transform="rotate(-4, 30, 370)">
+        messy, by design
+      </text>
+    </svg>
+  );
+}
+
+function Approach() {
+  const pillars = [
+    ["i.",   "Start with listening",       "We map your current workflow before writing a single line of code. The best solution is always the one that fits your reality."],
+    ["ii.",  "Build to your specs",        "Custom agents, automations, and tools designed around your team — not the other way around."],
+    ["iii.", "Stay close after launch",    "We don't hand off and disappear. The build is the start — we operate it with you, tune it to reality, and adjust as your business changes."],
+    ["iv.",  "Everything, connected",      "Your CRM, your drive, your spreadsheets, your tools — pulled into one system that works the way your team already does. No migrations. No new logins."],
+    ["v.",   "You own the outcome",        "Your data, your workflows, your results — always yours. We manage the infrastructure that keeps it running, so your team never has to."],
+  ];
+  return (
+    <section id="approach" style={{ background: "var(--paper-warm)" }}>
+      <div className="wrap">
+        <div className="approach-top" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+          <div>
+            <div className="eyebrow">The work beneath</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 72px)", margin: "18px 0 24px" }}>
+              Roots run <span className="italic-hand">deep.</span><br/>So does our work.
+            </h2>
+            <p style={{ color: "var(--ink-soft)", fontSize: 18, maxWidth: 520, margin: 0 }}>
+              Most AI tools are built for everyone, which means they're perfect for no one.
+              <strong style={{ fontWeight: 600 }}> We start with your business</strong> — your people, your process, your pain points — and build from there.
+            </p>
+            <p style={{ color: "var(--ink-soft)", fontSize: 17, maxWidth: 520, marginTop: 18 }}>
+              No bloated platforms. No subscriptions to things you don't use. Just clean, purpose-built tools that plug directly into how your team already works.
+            </p>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <RootsDiagram />
+          </div>
+        </div>
+
+        {/* Pillars */}
+        <div style={{ marginTop: 80, borderTop: "1px solid rgba(26,26,26,0.2)" }}>
+          {pillars.map(([n, t, body], i) => (
+            <div key={i} style={{
+              display: "grid",
+              gridTemplateColumns: "80px 1fr 2fr",
+              gap: 32,
+              padding: "32px 0",
+              borderBottom: "1px solid rgba(26,26,26,0.1)",
+              alignItems: "baseline",
+            }} className="pillar-row">
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--clay)", letterSpacing: 1 }}>{n}</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 2.4vw, 28px)", fontWeight: 600, letterSpacing: "-0.01em" }}>
+                {t}
+              </div>
+              <div style={{ color: "var(--ink-soft)", fontSize: 16, maxWidth: 580 }}>{body}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .approach-top { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .pillar-row { grid-template-columns: 48px 1fr !important; }
+          .pillar-row > div:nth-child(3) { grid-column: 1 / -1; padding-left: 48px; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function ProcessStepCard({ num, title, tag, body, tilt }) {
+  return (
+    <div style={{ transform: `rotate(calc(${tilt} * var(--tilt)))`, position: "relative" }}>
+      <div style={{
+        background: "#FFFCED",
+        border: "1px solid rgba(26,26,26,0.1)",
+        padding: "28px 28px 32px",
+        position: "relative",
+        boxShadow: "0 1px 0 rgba(26,26,26,0.04), 0 18px 28px -22px rgba(26,26,26,0.25)",
+      }}>
+        {/* tape */}
+        <div style={{
+          position: "absolute",
+          top: -11, left: "50%", transform: "translateX(-50%) rotate(-2deg)",
+          width: 70, height: 18,
+          background: "rgba(199, 98, 58, 0.18)",
+          borderLeft: "1px dashed rgba(199,98,58,0.3)",
+          borderRight: "1px dashed rgba(199,98,58,0.3)",
+        }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+          <span className="mono-label" style={{ color: "var(--clay)" }}>{num}</span>
+          <span className="mono-label">{tag}</span>
+        </div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 700, letterSpacing: "-0.01em", marginBottom: 12 }}>
+          {title}
+        </div>
+        <div style={{ color: "var(--ink-soft)", fontSize: 15, lineHeight: 1.55 }}>{body}</div>
+      </div>
+    </div>
+  );
+}
+
+function Process() {
+  const steps = [
+    { n: "i.",   title: "Discovery", tag: "Free call",     body: "A call to understand the business — your people, your process, where things slow down.", tilt: "-0.6" },
+    { n: "ii.",  title: "Pilot",     tag: "7-day trial",    body: "A short pilot build. You see the work function before committing to the full engagement.", tilt: "0.7" },
+    { n: "iii.", title: "Build",     tag: "Phased retainer",body: "Phased retainer with an implementation fee per phase. Each capability goes live before the next one starts.", tilt: "-0.4" },
+    { n: "iv.",  title: "Operate",   tag: "Ongoing",        body: "We manage the infrastructure, tune to reality, and grow with the business. Ongoing retainer.", tilt: "0.5" },
+  ];
+  return (
+    <section id="process">
+      <div className="wrap">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 40 }}>
+          <div>
+            <div className="eyebrow">How we work</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 72px)", margin: "18px 0 0" }}>
+              Four steps. <span className="italic-hand">No surprises.</span>
+            </h2>
+          </div>
+          <p style={{ maxWidth: 420, color: "var(--ink-soft)", fontSize: 17, margin: 0 }}>
+            Every engagement follows the same shape. You see the work before you commit, and each phase goes live before the next one starts.
+          </p>
+        </div>
+
+        <div style={{ position: "relative" }}>
+          {/* dashed connector line */}
+          <div style={{
+            position: "absolute",
+            top: "50%", left: "4%", right: "4%",
+            borderTop: "1.5px dashed rgba(107, 127, 110, 0.5)",
+            zIndex: 0,
+          }} className="process-line" />
+          <div className="process-grid" style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+            {steps.map((s, i) => <ProcessStepCard key={i} num={s.n} title={s.title} tag={s.tag} body={s.body} tilt={s.tilt} />)}
+          </div>
+        </div>
+
+        {/* Sign-off */}
+        <div style={{ marginTop: 72, borderTop: "1px solid rgba(26,26,26,0.15)", paddingTop: 36 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "center" }} className="process-cta">
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <span className="mono-label" style={{ color: "var(--clay)", paddingTop: 8, minWidth: 18 }}>Q.</span>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 2.6vw, 30px)", fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.25, color: "var(--ink)" }}>
+                  What would this look like for my team?
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <span className="mono-label" style={{ color: "var(--forest)", paddingTop: 8, minWidth: 18 }}>A.</span>
+                <span style={{ fontFamily: "var(--font-hand)", fontSize: "clamp(22px, 2.6vw, 28px)", color: "var(--forest)", lineHeight: 1.25 }}>
+                  Honestly — easier to show you than explain. Half an hour, your workflow, one sketch.
+                </span>
+              </div>
+            </div>
+            <a href="#contact" className="btn btn-primary" style={{ alignSelf: "center" }}>Start with a call →</a>
+          </div>
+          <style>{`
+            @media (max-width: 760px) {
+              .process-cta { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 1000px) {
+          .process-grid { grid-template-columns: 1fr 1fr !important; }
+          .process-line { display: none; }
+        }
+        @media (max-width: 600px) {
+          .process-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+Object.assign(window, { Approach, Process });
+
+
+// ==== components/fields.jsx ====
+// Fields / Industries + About + FAQ
+const { useState: useStateF } = React;
+
+function FieldCard({ num, title, body, tags, variant }) {
+  const isDark = variant === "dark";
+  return (
+    <div style={{
+      background: isDark ? "var(--forest)" : "transparent",
+      color: isDark ? "var(--paper)" : "var(--ink)",
+      border: isDark ? "none" : "1px solid rgba(26,26,26,0.15)",
+      padding: "32px 30px 28px",
+      display: "flex",
+      flexDirection: "column",
+      minHeight: 320,
+      position: "relative",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+        <span className="mono-label" style={{ color: isDark ? "rgba(244,241,232,0.6)" : "var(--mute)" }}>{num}</span>
+        <span className="mono-label" style={{ color: isDark ? "var(--clay-soft)" : "var(--clay)" }}>Field</span>
+      </div>
+      <h3 className="display" style={{ fontSize: 28, margin: 0, color: "inherit", letterSpacing: "-0.01em" }}>{title}</h3>
+      <p style={{ color: isDark ? "rgba(244,241,232,0.78)" : "var(--ink-soft)", fontSize: 15, lineHeight: 1.55, marginTop: 16, flex: 1 }}>
+        {body}
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 20 }}>
+        {tags.map(t => (
+          <span key={t} style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 10.5,
+            letterSpacing: 1,
+            textTransform: "uppercase",
+            padding: "5px 9px",
+            border: `1px solid ${isDark ? "rgba(244,241,232,0.25)" : "rgba(26,26,26,0.2)"}`,
+            color: isDark ? "rgba(244,241,232,0.85)" : "var(--ink-soft)",
+          }}>{t}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Fields() {
+  const fields = [
+    { n: "01", title: "Real Estate",               body: "Brokerage and agent teams — commercial and residential. Deal portals, commission engines, lease intelligence, executive dashboards — designed around how your team actually runs deals.", tags: ["Brokers", "Agents", "Deal Flow", "Commission"] },
+    { n: "02", title: "Professional Services",     body: "Mortgage brokers, insurance agents, accounting firms, wealth managers, family offices — anywhere deals, clients, and reporting live in spreadsheets and inboxes. We build pipelines, client portals, and reporting systems that pull from the tools you already use.", tags: ["Client Portals", "Reporting", "Pipelines", "Family Offices"] },
+    { n: "03", title: "Local Service Businesses",  body: "Inbound leads answered instantly, appointments booked, reviews requested. Or a full executive assistant agent — handling scheduling, invoicing, email, reminders, and follow-ups — so owners run the business, not the back office.", tags: ["Lead Response", "Scheduling", "Reviews", "EA Agent", "Invoicing"], variant: "dark" },
+    { n: "04", title: "Any Business. Any Workflow.", body: "If your team repeats the same work every week, handles inbound by hand, or lives in spreadsheets — there's a better way to run it.", tags: ["Automations", "Custom Agents", "Integrations"] },
+  ];
+  return (
+    <section id="fields" style={{ background: "var(--paper-warm)" }}>
+      <div className="wrap">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 48 }}>
+          <div>
+            <div className="eyebrow">Where we work</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 72px)", margin: "18px 0 0" }}>
+              Built for teams where every <span className="italic-hand">detail matters.</span>
+            </h2>
+          </div>
+          <div className="hand" style={{ maxWidth: 280, color: "var(--sage)" }}>
+            I work with teams who are done wrestling with tools that almost fit.
+          </div>
+        </div>
+
+        <div className="fields-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0, border: "1px solid rgba(26,26,26,0.15)" }}>
+          {fields.map((f, i) => (
+            <div key={f.n} style={{
+              borderRight: i < fields.length - 1 ? "1px solid rgba(26,26,26,0.1)" : "none",
+            }} className="field-cell">
+              <FieldCard {...f} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 1100px) {
+          .fields-grid { grid-template-columns: 1fr 1fr !important; }
+          .field-cell:nth-child(1), .field-cell:nth-child(3) { border-right: 1px solid rgba(26,26,26,0.1) !important; }
+          .field-cell:nth-child(2), .field-cell:nth-child(4) { border-right: none !important; }
+          .field-cell:nth-child(1), .field-cell:nth-child(2) { border-bottom: 1px solid rgba(26,26,26,0.1); }
+        }
+        @media (max-width: 640px) {
+          .fields-grid { grid-template-columns: 1fr !important; }
+          .field-cell { border-right: none !important; border-bottom: 1px solid rgba(26,26,26,0.1) !important; }
+          .field-cell:last-child { border-bottom: none !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function AboutNik() {
+  return (
+    <section id="about">
+      <div className="wrap">
+        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: 72, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="eyebrow">About</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 72px)", margin: "6px 0 0" }}>
+              Who's <span className="italic-hand">behind this.</span>
+            </h2>
+            {/* Signature card instead of portrait */}
+            <div style={{
+              background: "#FFFCED",
+              border: "1px solid rgba(26,26,26,0.12)",
+              padding: "22px 24px",
+              marginTop: 14,
+              maxWidth: 380,
+              transform: "rotate(calc(-0.5 * var(--tilt)))",
+              boxShadow: "0 18px 34px -22px rgba(26,26,26,0.25)",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, gap: 16 }}>
+                <span className="mono-label" style={{ color: "var(--clay)" }}>Founder · RootWurx</span>
+                {/* RW primary mark — single box, serif R + cursive W dropped below baseline */}
+                <svg viewBox="0 0 80 72" width="86" height="78" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <rect x="3" y="3" width="74" height="66" fill="none" stroke="#1E3A2F" strokeWidth="2" />
+                  {/* R — serif, ink */}
+                  <text x="22" y="50" textAnchor="middle" fontFamily="'Literata', Georgia, serif" fontSize="46" fontWeight="500" fill="#1A1A1A" letterSpacing="-1">R</text>
+                  {/* W — cursive, sage, sits lower than R baseline */}
+                  <text x="48" y="60" textAnchor="middle" fontFamily="'Caveat', 'Reckless Neue', cursive" fontStyle="italic" fontSize="44" fontWeight="500" fill="#6B9A5F">W</text>
+                </svg>
+              </div>
+              <div style={{ fontFamily: "var(--font-hand)", fontSize: 36, color: "var(--forest)", lineHeight: 1, letterSpacing: "-0.01em" }}>
+                Nik Mirando
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p style={{ color: "var(--ink-soft)", fontSize: 19, marginTop: 0, maxWidth: 600, lineHeight: 1.55 }}>
+              <strong style={{ fontWeight: 600 }}>RootWurx is run by Nik Mirando</strong> — a builder with a background in institutional real estate and sustainability. Roots in the outdoors, hands in the dirt, and a habit of connecting the dots.
+            </p>
+            <p style={{ color: "var(--ink-soft)", fontSize: 17, maxWidth: 600, marginTop: 18 }}>
+              The work has always been the same: pay attention to what's actually there, understand how the pieces fit, and build something useful. RootWurx exists because most software isn't built for the people using it — it's built for everyone. The better version is quieter, closer, and made for how your team actually works.
+            </p>
+            <p style={{ color: "var(--mute)", fontSize: 15, maxWidth: 600, marginTop: 22, fontStyle: "italic", fontFamily: "var(--font-italic)" }}>
+              Off hours: gardening, fishing, and a running list of boats, houses, and projects to bring back to life.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function FAQItem({ q, a, idx, open, setOpen }) {
+  const isOpen = open === idx;
+  return (
+    <div style={{ borderBottom: "1px solid rgba(26,26,26,0.15)" }}>
+      <button
+        onClick={() => setOpen(isOpen ? null : idx)}
+        style={{
+          width: "100%",
+          display: "grid", gridTemplateColumns: "60px 1fr 40px",
+          gap: 20,
+          alignItems: "baseline",
+          background: "none", border: "none",
+          padding: "28px 0",
+          cursor: "pointer",
+          textAlign: "left",
+          fontFamily: "inherit",
+        }}>
+        <span className="mono-label" style={{ color: "var(--clay)" }}>
+          {String(idx + 1).padStart(2, "0")}
+        </span>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: "clamp(20px, 2.2vw, 26px)", fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.005em" }}>
+          {q}
+        </span>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 28, color: "var(--forest)", justifySelf: "end", transition: "transform 0.3s ease", transform: isOpen ? "rotate(45deg)" : "rotate(0)" }}>
+          +
+        </span>
+      </button>
+      <div style={{
+        maxHeight: isOpen ? 400 : 0,
+        overflow: "hidden",
+        transition: "max-height 0.35s ease, opacity 0.3s ease",
+        opacity: isOpen ? 1 : 0,
+      }}>
+        <div style={{ display: "grid", gridTemplateColumns: "60px 1fr 40px", gap: 20, paddingBottom: 28 }}>
+          <div />
+          <div style={{ color: "var(--ink-soft)", fontSize: 16, maxWidth: 680 }}>
+            {a}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FAQ() {
+  const [open, setOpen] = useStateF(0);
+  const items = [
+    { q: "What does it cost?", a: "Discovery calls are free. Most engagements start with a no-cost pilot — we build the first tier at our risk, and you only begin paying once it's live and working. From there, engagements run on a phased retainer with a small implementation fee per phase. Pricing scales with scope, not seat count." },
+    { q: "Who owns the work?", a: "Your data, your workflows, and your results are always yours. We manage the underlying infrastructure that keeps the system running, so your team never has to. You get the outcome; we handle the operation." },
+    { q: "Do I need to migrate or replace my existing tools?", a: "Almost never. We build around the stack you already use — your CRM, your drive, your spreadsheets, your communication tools. No migrations, no new logins for your team." },
+    { q: "How long does a project take?", a: "The pilot is usually live within a few weeks of the discovery call. Subsequent phases go live in sequence — weeks, not months. We prefer to ship functional, focused capability early and build up from there." },
+    { q: "What if my business isn't on the list of industries you serve?", a: "The industries section shows where we have the most experience, but the approach is the same regardless of vertical. If your team repeats the same work every week, handles inbound by hand, or lives in spreadsheets — there's a good chance we can help." },
+    { q: "What happens after the build is live?", a: "We stay on. The build is the start — we operate the system with you, tune it to reality, and adjust as your business changes. Retainer engagements mean continuous improvement, not a handoff and goodbye." },
+    { q: "How do we start?", a: "Book a free call. We'll talk through what your team does, where the friction lives, and whether there's a fit. No pitch deck, no hard sell — just a conversation." },
+  ];
+  return (
+    <section id="faq">
+      <div className="wrap">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 48 }} className="faq-grid">
+          <div>
+            <div className="eyebrow">FAQ</div>
+            <h2 className="display" style={{ fontSize: "clamp(40px, 6vw, 64px)", margin: "18px 0 0" }}>
+              Common <span className="italic-hand">questions.</span>
+            </h2>
+            <p style={{ color: "var(--ink-soft)", fontSize: 16, marginTop: 24, maxWidth: 320 }}>
+              Anything else? Reach out — <a href="mailto:nik@rootwurx.com" className="ilink" style={{ color: "var(--forest)", fontWeight: 500 }}>nik@rootwurx.com</a>
+            </p>
+          </div>
+          <div>
+            {items.map((it, i) => (
+              <FAQItem key={i} idx={i} open={open} setOpen={setOpen} q={it.q} a={it.a} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .faq-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+Object.assign(window, { Fields, AboutNik, FAQ });
+
+
+// ==== components/contact.jsx ====
+// Contact + Footer
+const { useState: useStateC } = React;
+
+const WEB3FORMS_KEY = "db4002e6-321a-4b1f-8cae-36856346a80f";
+
+function ContactForm() {
+  const [form, setForm] = useStateC({ name: "", company: "", working_on: "", whats_not: "" });
+  const [sent, setSent] = useStateC(false);
+  const [sending, setSending] = useStateC(false);
+  const [errorMsg, setErrorMsg] = useStateC("");
+  const update = k => e => setForm({ ...form, [k]: e.target.value });
+  const submit = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setErrorMsg("");
+    try {
+      const payload = {
+        access_key: WEB3FORMS_KEY,
+        subject: `New RootWurx inquiry — ${form.name || "Unknown"} / ${form.company || ""}`,
+        from_name: "RootWurx.com",
+        name: form.name,
+        company: form.company,
+        working_on: form.working_on,
+        whats_not: form.whats_not,
+      };
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        setSent(true);
+      } else {
+        setErrorMsg((data && data.message) || "Something went wrong. Please email nik@rootwurx.com.");
+      }
+    } catch (err) {
+      setErrorMsg("Couldn't send. Please email nik@rootwurx.com.");
+    } finally {
+      setSending(false);
+    }
+  };
+  const inputStyle = {
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    borderBottom: "1px solid rgba(26,26,26,0.25)",
+    padding: "12px 2px 10px",
+    fontFamily: "var(--font-body)",
+    fontSize: 16,
+    color: "var(--ink)",
+    outline: "none",
+    transition: "border-color 0.2s ease",
+  };
+  return (
+    <form action="https://api.web3forms.com/submit" method="POST" onSubmit={submit} style={{
+      background: "#FFFCED",
+      padding: "36px 36px 32px",
+      border: "1px solid rgba(26,26,26,0.1)",
+      transform: "rotate(calc(-0.5 * var(--tilt)))",
+      boxShadow: "0 20px 40px -26px rgba(26,26,26,0.3)",
+      position: "relative",
+    }}>
+      {/* hidden fields for Web3Forms (also work as no-JS fallback) */}
+      <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+      <input type="hidden" name="from_name" value="RootWurx.com" />
+      <input type="hidden" name="subject" value="New RootWurx inquiry" />
+      <input type="checkbox" name="botcheck" style={{ display: "none" }} tabIndex="-1" autoComplete="off" />
+      {/* stamp in corner */}
+      <div style={{ position: "absolute", top: 22, right: 22 }}>
+        <div style={{
+          width: 56, height: 56,
+          border: "1.5px solid var(--clay)", color: "var(--clay)",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase",
+          transform: "rotate(8deg)",
+          opacity: 0.9,
+        }}>
+          <div style={{ fontWeight: 600 }}>RAX</div>
+          <div style={{ fontSize: 8 }}>01</div>
+          <div style={{ fontSize: 8 }}>'26</div>
+        </div>
+      </div>
+
+      <div className="mono-label" style={{ marginBottom: 8, color: "var(--clay)" }}>Discovery Intake</div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, marginBottom: 22, letterSpacing: "-0.005em", paddingRight: 60, color: "var(--ink)" }}>
+        Tell me about your business<br/>and what you're trying to solve.
+      </div>
+
+      {sent ? (
+        <div style={{ padding: "40px 0", textAlign: "center" }}>
+          <div style={{ fontFamily: "var(--font-hand)", fontSize: 30, color: "var(--forest)" }}>
+            Thanks. I'll be in touch within a day.
+          </div>
+          <div className="mono-label" style={{ marginTop: 14 }}>— Nik</div>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+            <div>
+              <label className="mono-label">Name</label>
+              <input name="name" style={inputStyle} value={form.name} onChange={update("name")} required />
+            </div>
+            <div>
+              <label className="mono-label">Company</label>
+              <input name="company" style={inputStyle} value={form.company} onChange={update("company")} required />
+            </div>
+            <div>
+              <label className="mono-label">What are you working on?</label>
+              <input name="working_on" style={inputStyle} value={form.working_on} onChange={update("working_on")} />
+            </div>
+            <div>
+              <label className="mono-label">What's not working today?</label>
+              <input name="whats_not" style={inputStyle} value={form.whats_not} onChange={update("whats_not")} />
+            </div>
+          </div>
+          {errorMsg && (
+            <div style={{ marginTop: 16, color: "var(--clay)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
+              {errorMsg}
+            </div>
+          )}
+          <button type="submit" disabled={sending} className="btn btn-primary" style={{ marginTop: 28, width: "100%", justifyContent: "center", padding: "16px 20px", opacity: sending ? 0.6 : 1 }}>
+            {sending ? "Sending…" : "Start the Conversation →"}
+          </button>
+        </>
+      )}
+    </form>
+  );
+}
+
+function Contact() {
+  return (
+    <section id="contact" style={{ background: "var(--forest)", color: "var(--paper)" }}>
+      <div className="wrap">
+        <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 72, alignItems: "center" }}>
+          <div>
+            <div className="eyebrow" style={{ color: "var(--sage-soft)" }}>
+              <style>{`.contact-eyebrow::before { background: var(--sage-soft) !important; }`}</style>
+              Plant something
+            </div>
+            <h2 className="display" style={{ fontSize: "clamp(44px, 6.5vw, 92px)", margin: "20px 0 24px", color: "var(--paper)" }}>
+              Let's build <span style={{ fontFamily: "var(--font-italic)", fontStyle: "italic", fontWeight: 400, color: "var(--paper)" }}>something</span><br/>
+              <span style={{ position: "relative", display: "inline-block", fontFamily: "var(--font-italic)", fontStyle: "italic", fontWeight: 400, color: "#B9C7A8", transform: "rotate(-2.2deg)", transformOrigin: "left center" }}>
+                that Wurx.
+                <span style={{
+                  position: "absolute",
+                  left: "-2%", right: "-2%",
+                  bottom: "-0.05em",
+                  height: "0.14em",
+                  background: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'><path d='M2 6 Q 50 1 100 5 T 198 4' stroke='%23B9C7A8' stroke-width='2.2' fill='none' stroke-linecap='round'/></svg>\") no-repeat",
+                  backgroundSize: "100% 100%",
+                  pointerEvents: "none",
+                }} />
+              </span>
+            </h2>
+            <p style={{ color: "rgba(244,241,232,0.82)", fontSize: 19, maxWidth: 460 }}>
+              Tell me what you need. I'll tell you what's possible.
+            </p>
+            <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 18 }}>
+              <div>
+                <div className="mono-label" style={{ color: "rgba(244,241,232,0.55)" }}>Direct</div>
+                <a href="mailto:nik@rootwurx.com" className="ilink" style={{ fontFamily: "var(--font-display)", fontSize: 26, color: "var(--paper)", borderBottomColor: "rgba(244,241,232,0.4)" }}>
+                  nik@rootwurx.com
+                </a>
+              </div>
+            </div>
+          </div>
+          <div>
+            <ContactForm />
+          </div>
+        </div>
+      </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .contact-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer style={{ background: "var(--forest-deep)", color: "rgba(244,241,232,0.7)", padding: "48px 0 28px" }}>
+      <div className="wrap">
+        <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 32, alignItems: "flex-start" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 2, fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600, color: "var(--paper)" }}>
+              <span>Root</span>
+              <span style={{ fontFamily: "var(--font-italic)", fontStyle: "italic", color: "#B9C7A8", fontWeight: 400 }}>Wurx</span>
+            </div>
+            <div style={{ fontFamily: "var(--font-hand)", fontSize: 20, color: "#B9C7A8", marginTop: 8 }}>
+              Tools and systems, built to fit.
+            </div>
+            <div style={{ marginTop: 20, fontSize: 13, maxWidth: 320 }}>
+              AI-forward, not AI-first. One partner, end-to-end.
+            </div>
+          </div>
+          <div>
+            <div className="mono-label" style={{ color: "rgba(244,241,232,0.5)", marginBottom: 14 }}>Site</div>
+            {["Work", "Approach", "Process", "Fields", "About", "FAQ"].map(x => (
+              <div key={x} style={{ fontSize: 14, padding: "4px 0" }}>
+                <a href={`#${x.toLowerCase()}`} style={{ color: "rgba(244,241,232,0.8)" }}>{x}</a>
+              </div>
+            ))}
+          </div>
+          <div>
+            <div className="mono-label" style={{ color: "rgba(244,241,232,0.5)", marginBottom: 14 }}>Contact</div>
+            <div style={{ fontSize: 14, padding: "4px 0" }}><a href="mailto:nik@rootwurx.com" style={{ color: "rgba(244,241,232,0.8)" }}>nik@rootwurx.com</a></div>
+            <div style={{ fontSize: 14, padding: "4px 0" }}><a href="#contact" style={{ color: "rgba(244,241,232,0.8)" }}>Book a call</a></div>
+            <div style={{ fontSize: 14, padding: "4px 0" }}><a href="https://influxlead.com" target="_blank" rel="noreferrer" style={{ color: "rgba(244,241,232,0.8)" }}>InfluxLead ↗</a></div>
+          </div>
+          <div>
+            <div className="mono-label" style={{ color: "rgba(244,241,232,0.5)", marginBottom: 14 }}>Address</div>
+            <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+              RootWurx<br/>
+              PO Box 271<br/>
+              Ada, MI 49301
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 48, paddingTop: 20, borderTop: "1px solid rgba(244,241,232,0.15)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12, fontSize: 12, fontFamily: "var(--font-mono)", letterSpacing: 0.5, color: "rgba(244,241,232,0.5)" }}>
+          <div>© 2026 · RootWurx · rootwurx.com</div>
+          <div>Designed & operated by Nik.</div>
+        </div>
+      </div>
+      <style>{`
+        @media (max-width: 800px) {
+          .footer-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width: 500px) {
+          .footer-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </footer>
+  );
+}
+
+Object.assign(window, { Contact, Footer });
+
+
+// ==== components/app.jsx ====
+// Philosophy sidebar / "Tilted Truth" — editorial interlude
+function TiltedTruth() {
+  return (
+    <section style={{ background: "var(--paper)", paddingTop: "clamp(24px, 3vw, 48px)", paddingBottom: "clamp(40px, 6vw, 80px)" }}>
+      <div className="wrap">
+        <div className="tt-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 64, alignItems: "center" }}>
+          <div>
+            <div className="eyebrow">A Principle</div>
+            <h2 className="display" style={{ fontSize: "clamp(36px, 5vw, 58px)", margin: "18px 0 24px", letterSpacing: "-0.01em" }}>
+              Technology should <span className="italic-hand">disappear</span> into your work.
+            </h2>
+            <p style={{ color: "var(--ink-soft)", fontSize: 18, maxWidth: 520, margin: 0 }}>
+              Most software forces you to change. I build systems that fit the way you <em style={{ fontFamily: "var(--font-italic)" }}>actually</em> work.
+            </p>
+            <p style={{ color: "var(--ink-soft)", fontSize: 17, maxWidth: 520, marginTop: 14 }}>
+              No bloat. No handoffs. Just the right tools, connected, built to grow with you.
+            </p>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className="tape" style={{ maxWidth: 360, padding: "26px 28px", transform: "rotate(calc(1.2 * var(--tilt)))" }}>
+              <div className="mono-label" style={{ color: "var(--clay)", marginBottom: 12 }}>What that looks like</div>
+              <ul style={{ fontFamily: "var(--font-hand)", fontSize: 26, lineHeight: 1.35, color: "var(--ink)", listStyle: "none", padding: 0, margin: 0 }}>
+                <li>· Clear scoping</li>
+                <li>· Thoughtful design</li>
+                <li>· Pragmatic build</li>
+                <li>· Reliable operation</li>
+                <li>· Ongoing iteration</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .tt-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function App() {
+  const { tweaks, setTweaks, active } = useTweaks();
+  return (
+    <>
+      <Nav />
+      <Hero headlineVariant={tweaks.headline} />
+      <Work />
+      <TiltedTruth />
+      <Approach />
+      <Process />
+      <Fields />
+      <AboutNik />
+      <FAQ />
+      <Contact />
+      <Footer />
+      <TweaksPanel active={active} tweaks={tweaks} setTweaks={setTweaks} />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+
+</script>
+</body>
+</html>
