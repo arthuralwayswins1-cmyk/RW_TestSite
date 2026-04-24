@@ -337,6 +337,12 @@ section {
   /* Roots diagram — constrain height */
   .roots-diagram { max-height: 320px !important; }
 
+  /* Case card mocks — desktop panels hidden on mobile */
+  .sms-mock-grid { grid-template-columns: 1fr !important; }
+  .sms-side-panel { display: none !important; }
+  .cre-mock-grid { grid-template-columns: 1fr !important; }
+  .cre-sidebar { display: none !important; }
+
   /* Case card — stack header above mock; tighten tool chips */
   .case-card { padding: 24px 20px !important; }
   .case-card + .case-card { margin-top: 28px !important; }
@@ -1135,6 +1141,7 @@ function InfluxLeadMock() {
   return /*#__PURE__*/React.createElement(BrowserChrome, {
     title: "Lead Agent \xB7 live conversation"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "sms-mock-grid",
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 220px",
@@ -1212,6 +1219,7 @@ function InfluxLeadMock() {
       fontStyle: "italic"
     }
   }, "Agent drafting reply\u2026")), /*#__PURE__*/React.createElement("aside", {
+    className: "sms-side-panel",
     style: {
       background: "#fff",
       borderLeft: "1px solid rgba(26,26,26,0.08)",
@@ -1295,12 +1303,14 @@ function CREMock() {
   return /*#__PURE__*/React.createElement(BrowserChrome, {
     title: "cre.operating \xB7 internal"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "cre-mock-grid",
     style: {
       display: "grid",
       gridTemplateColumns: "180px 1fr",
       minHeight: 340
     }
   }, /*#__PURE__*/React.createElement("aside", {
+    className: "cre-sidebar",
     style: {
       background: "#132821",
       color: "#D7DAC7",
