@@ -31,7 +31,7 @@
   --font-display: "Literata", "Source Serif Pro", Georgia, serif;
   --font-section: "Literata", Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-hand: "Caveat", "Homemade Apple", cursive;
+  --font-hand: "Instrument Serif", "Literata", Georgia, serif;
   --font-italic: "Instrument Serif", "Literata", Georgia, serif;
   --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
@@ -103,6 +103,7 @@ a { color: inherit; text-decoration: none; }
 .hand {
   font-family: var(--font-hand);
   font-weight: 400;
+  font-style: italic;
   color: var(--forest);
   font-size: 1.4em;
   line-height: 1.1;
@@ -115,20 +116,13 @@ a { color: inherit; text-decoration: none; }
   color: var(--mute);
 }
 
-/* underline accents — hand-drawn feel */
+/* underline accents — removed for a more elevated feel */
 .underline-hand {
   position: relative;
   display: inline-block;
 }
 .underline-hand::after {
-  content: "";
-  position: absolute;
-  left: -2%; right: -2%;
-  bottom: -0.05em;
-  height: 0.35em;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 7 Q 50 2 100 6 T 198 5' stroke='%236B9A5F' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") no-repeat;
-  background-size: 100% 100%;
-  pointer-events: none;
+  content: none;
 }
 
 /* shared wrappers */
@@ -256,69 +250,144 @@ section {
   body { font-size: 16px; }
 }
 
-/* === Mobile optimization pass === */
+/* === Mobile optimization pass (≤768px) === */
 @media (max-width: 768px) {
-  :root { --pad: 18px; --tilt: 0.3deg; }
+  :root { --pad: 18px; --tilt: 0.2deg; }
 
-  /* Stop 100vw horizontal scroll */
+  /* Stop horizontal overflow */
   html, body { overflow-x: hidden; max-width: 100vw; }
   * { max-width: 100%; }
   img, svg, video { max-width: 100%; height: auto; display: block; }
 
-  /* Section padding */
+  /* Compact section rhythm */
   section { padding-top: 56px !important; padding-bottom: 56px !important; }
-  section[id] { scroll-margin-top: 64px; }
+  section[id] { scroll-margin-top: 68px; }
 
-  /* Container padding — replaces 64px with 18px on sides */
+  /* Container padding */
   .wrap { padding-left: var(--pad) !important; padding-right: var(--pad) !important; }
 
-  /* ALL multi-column grids stack */
+  /* Collapse every multi-column grid */
   [style*="gridTemplateColumns"],
   [style*="grid-template-columns"],
   .grid-2, .grid-3, .grid-4,
   .fields-grid, .faq-grid, .about-grid, .process-grid, .work-grid,
   .contact-grid, .tt-grid, .approach-top, .hero-grid, .footer-grid,
-  .process-cta, .pillar-row {
+  .process-cta, .pillar-row, .hero-info-bar {
     grid-template-columns: 1fr !important;
-    gap: 28px !important;
+    gap: 24px !important;
   }
 
-  /* Typography scaling */
-  p { font-size: 16px !important; line-height: 1.55 !important; }
-  h1, h2, h3 { letter-spacing: -0.01em !important; }
+  /* Display type scaling — the "we build tools..." hero and section headlines */
+  h1, .display {
+    font-size: clamp(36px, 9vw, 52px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.02em !important;
+  }
+  h2, .section-title {
+    font-size: clamp(28px, 7vw, 40px) !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.01em !important;
+  }
+  h3 {
+    font-size: clamp(22px, 5.5vw, 28px) !important;
+    line-height: 1.15 !important;
+  }
 
-  /* Remove wild rotations — they cause overflow */
+  /* Body copy */
+  p { font-size: 16px !important; line-height: 1.55 !important; }
+
+  /* Eyebrows / mono labels — don't let them wrap weirdly */
+  .mono-label, [class*="eyebrow"] {
+    font-size: 11px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* Kill ALL rotation on mobile — cleaner silhouette */
   [style*="rotate("] { transform: none !important; }
   .tape, .stamp { transform: none !important; }
 
-  /* Browser chrome mocks — keep them contained */
+  /* Browser chrome mocks — force full width, no minimum */
   .browser-chrome { width: 100% !important; max-width: 100% !important; }
+  .browser-chrome > * { max-width: 100% !important; }
 
-  /* Hero info bar — collapse 5 cols to 2x3 */
-  .hero-info-bar {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 20px !important;
-    margin-top: 32px !important;
+  /* Hide the "Scroll · Explore" flourish on mobile */
+  .scroll-explore { display: none !important; }
+
+  /* Nav — shrink links, hide secondary ones */
+  .nav-links { gap: 12px !important; font-size: 13px !important; }
+  .nav-links > a:not(.btn) { display: none !important; }
+  .nav-links .btn { padding: 10px 14px !important; font-size: 13px !important; }
+
+  /* Buttons — larger touch targets, full-ish width on mobile */
+  .btn {
+    padding: 14px 22px !important;
+    font-size: 15px !important;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
-  .hero-info-bar .scroll-explore { display: none !important; }
 
-  /* Nav — mobile menu button visible; trim link group */
-  .nav-links { gap: 14px !important; font-size: 13px !important; }
-
-  /* Buttons */
-  .btn { padding: 12px 20px !important; font-size: 14px !important; }
-
-  /* Knowledge agent SVG — let it shrink */
+  /* SVG sizing — let diagrams shrink but keep RW logo small */
   svg[viewBox] { width: 100% !important; height: auto !important; }
-  /* Except the RW logo mark — keep it small */
-  svg.rw-logo-mark { width: 72px !important; height: 66px !important; flex-shrink: 0; }
+  svg.rw-logo-mark { width: 64px !important; height: 60px !important; flex-shrink: 0; }
+
+  /* Hero diagram — hide on mobile, save real estate */
+  .hero-diagram { display: none !important; }
+
+  /* Roots diagram — constrain height */
+  .roots-diagram { max-height: 320px !important; }
+
+  /* Case card — stack header above mock; tighten tool chips */
+  .case-card { padding: 24px 20px !important; }
+  .case-card + .case-card { margin-top: 28px !important; }
+
+  /* Knowledge Agent animation — cap height, keep legible */
+  .knowledge-agent-svg { max-height: 420px !important; }
+
+  /* Process steps — tighter cards */
+  .process-step { padding: 20px !important; }
+
+  /* FAQ — native disclosure styling; larger tap targets */
+  details { padding: 16px 0 !important; }
+  details summary {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+    padding: 4px 0 !important;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* About / business card section */
+  .about-card { padding: 28px 22px !important; }
+
+  /* Contact form — full width inputs, larger tap targets */
+  input, textarea, select, button {
+    font-size: 16px !important;  /* prevents iOS zoom on focus */
+    min-height: 44px;
+  }
+  textarea { min-height: 120px !important; }
+
+  /* Footer — tighter */
+  footer { padding: 36px 0 20px !important; }
+  .footer-grid { gap: 28px !important; }
+
+  /* Tilted Truth interlude — smaller quote */
+  .tt-quote { font-size: clamp(22px, 5.5vw, 30px) !important; line-height: 1.25 !important; }
+
+  /* Hide decorative tape/stickers on the smallest screens — they add clutter */
+  .deco-tape, .deco-stamp { display: none !important; }
 }
 
-@media (max-width: 480px) {
-  /* Ultra-narrow — collapse hero info bar too */
-  .hero-info-bar { grid-template-columns: 1fr !important; }
-  .nav-links { display: none !important; }
+/* === Ultra-narrow (≤420px) === */
+@media (max-width: 420px) {
+  :root { --pad: 16px; }
   section { padding-top: 44px !important; padding-bottom: 44px !important; }
+  h1, .display { font-size: 34px !important; }
+  h2, .section-title { font-size: 26px !important; }
+  .btn { width: 100%; justify-content: center; }
+  /* Allow the primary nav CTA to stay inline */
+  .nav-links .btn { width: auto !important; }
 }
 
 /* Links inline */
@@ -599,18 +668,7 @@ function Nav() {
       fontWeight: 400,
       position: "relative"
     }
-  }, "Wurx", /*#__PURE__*/React.createElement("span", {
-    style: {
-      position: "absolute",
-      left: "-4%",
-      right: "-4%",
-      bottom: "-6px",
-      height: 6,
-      background: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' preserveAspectRatio='none'><path d='M2 5 Q 15 1 30 4 T 58 3' stroke='%236B9A5F' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>\") no-repeat",
-      backgroundSize: "100% 100%",
-      pointerEvents: "none"
-    }
-  }))), /*#__PURE__*/React.createElement("div", {
+  }, "Wurx")), /*#__PURE__*/React.createElement("div", {
     className: "nav-links",
     style: {
       display: "flex",
@@ -1032,32 +1090,24 @@ function InfluxLeadMock() {
     time: "9:47 PM"
   }, {
     from: "agent",
-    text: "Yes — sorry to hear that. I can get someone out fast. What's the address?",
+    text: "Yes — sorry to hear that. What's the address?",
     time: "9:47 PM"
   }, {
     from: "lead",
-    text: "1120 Maple Ave, Grand Rapids",
+    text: "1120 Maple Ave, Grand Rapids. Two-story single family.",
     time: "9:48 PM"
   }, {
     from: "agent",
-    text: "Got it. A single-family home, or multi-unit?",
+    text: "I have tomorrow 9:30 AM or Thursday 2 PM. Which works?",
     time: "9:48 PM"
-  }, {
-    from: "lead",
-    text: "Single family. Two-story.",
-    time: "9:49 PM"
-  }, {
-    from: "agent",
-    text: "Perfect. I have tomorrow at 9:30 AM or Thursday at 2 PM. Which works?",
-    time: "9:49 PM"
   }, {
     from: "lead",
     text: "Tomorrow 9:30",
-    time: "9:50 PM"
+    time: "9:49 PM"
   }, {
     from: "agent",
-    text: "Booked ✓ You'll get a confirmation text from Marco (our lead tech) in the morning. Anything else I should flag for him?",
-    time: "9:50 PM"
+    text: "Booked ✓ Confirmation coming from Marco (lead tech) in the morning.",
+    time: "9:49 PM"
   }];
   const bubble = m => {
     const isAgent = m.from === "agent";
@@ -2957,7 +3007,7 @@ function Process() {
       color: "var(--forest)",
       lineHeight: 1.25
     }
-  }, "Honestly \u2014 easier to show you than explain. Half an hour, your workflow, one sketch."))), /*#__PURE__*/React.createElement("a", {
+  }, "It's different for every team. Walk me through your workflow on a call and we'll figure out where it actually fits \u2014 or if it doesn't."))), /*#__PURE__*/React.createElement("a", {
     href: "#contact",
     className: "btn btn-primary",
     style: {
@@ -3224,7 +3274,7 @@ function AboutNik() {
     x: "48",
     y: "60",
     textAnchor: "middle",
-    fontFamily: "'Caveat', 'Reckless Neue', cursive",
+    fontFamily: "'Instrument Serif', 'Literata', Georgia, serif",
     fontStyle: "italic",
     fontSize: "44",
     fontWeight: "500",
@@ -3343,7 +3393,7 @@ function FAQItem({
   }, a))));
 }
 function FAQ() {
-  const [open, setOpen] = useStateF(0);
+  const [open, setOpen] = useStateF(-1);
   const items = [{
     q: "What does it cost?",
     a: "Discovery calls are free. Most engagements start with a no-cost pilot — we build the first tier at our risk, and you only begin paying once it's live and working. From there, engagements run on a phased retainer with a small implementation fee per phase. Pricing scales with scope, not seat count."
@@ -3371,28 +3421,56 @@ function FAQ() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "wrap"
   }, /*#__PURE__*/React.createElement("div", {
+    onClick: () => setOpen(open === "all" ? -1 : "all"),
+    role: "button",
+    tabIndex: 0,
+    onKeyDown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(open === "all" ? -1 : "all"); } },
     style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 2fr",
-      gap: 48
-    },
-    className: "faq-grid"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "22px 28px",
+      border: "1px solid rgba(26,26,26,0.18)",
+      borderRadius: 4,
+      background: "var(--paper-warm)",
+      cursor: "pointer",
+      userSelect: "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { display: "flex", alignItems: "baseline", gap: 18 }
+  }, /*#__PURE__*/React.createElement("span", {
     className: "eyebrow"
-  }, "FAQ"), /*#__PURE__*/React.createElement("h2", {
+  }, "FAQ"), /*#__PURE__*/React.createElement("span", {
     className: "display",
     style: {
-      fontSize: "clamp(40px, 6vw, 64px)",
-      margin: "18px 0 0"
+      fontSize: "clamp(26px, 3.4vw, 36px)",
+      letterSpacing: "-0.01em"
     }
   }, "Common ", /*#__PURE__*/React.createElement("span", {
     className: "italic-hand"
-  }, "questions.")), /*#__PURE__*/React.createElement("p", {
+  }, "questions."))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "var(--font-mono)",
+      fontSize: 24,
+      color: "var(--forest)",
+      transition: "transform 0.25s ease",
+      transform: open === "all" ? "rotate(45deg)" : "rotate(0deg)",
+      lineHeight: 1
+    }
+  }, "+")), open === "all" && /*#__PURE__*/React.createElement("div", {
+    style: { marginTop: 24 }
+  }, items.map((it, i) => /*#__PURE__*/React.createElement(FAQItem, {
+    key: i,
+    idx: i,
+    open: open,
+    setOpen: setOpen,
+    q: it.q,
+    a: it.a
+  })), /*#__PURE__*/React.createElement("p", {
     style: {
       color: "var(--ink-soft)",
-      fontSize: 16,
-      marginTop: 24,
-      maxWidth: 320
+      fontSize: 15,
+      marginTop: 28
     }
   }, "Anything else? Reach out \u2014 ", /*#__PURE__*/React.createElement("a", {
     href: "mailto:nik@rootwurx.com",
@@ -3401,14 +3479,7 @@ function FAQ() {
       color: "var(--forest)",
       fontWeight: 500
     }
-  }, "nik@rootwurx.com"))), /*#__PURE__*/React.createElement("div", null, items.map((it, i) => /*#__PURE__*/React.createElement(FAQItem, {
-    key: i,
-    idx: i,
-    open: open,
-    setOpen: setOpen,
-    q: it.q,
-    a: it.a
-  }))))), /*#__PURE__*/React.createElement("style", null, `
+  }, "nik@rootwurx.com")))), /*#__PURE__*/React.createElement("style", null, `
         @media (max-width: 900px) {
           .faq-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
         }
@@ -3429,9 +3500,9 @@ const WEB3FORMS_KEY = "db4002e6-321a-4b1f-8cae-36856346a80f";
 function ContactForm() {
   const [form, setForm] = useStateC({
     name: "",
+    email: "",
     company: "",
-    working_on: "",
-    whats_not: ""
+    context: ""
   });
   const [sent, setSent] = useStateC(false);
   const [sending, setSending] = useStateC(false);
@@ -3450,9 +3521,9 @@ function ContactForm() {
         subject: `New RootWurx inquiry — ${form.name || "Unknown"} / ${form.company || ""}`,
         from_name: "RootWurx.com",
         name: form.name,
+        email: form.email,
         company: form.company,
-        working_on: form.working_on,
-        whats_not: form.whats_not
+        context: form.context
       };
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -3601,6 +3672,15 @@ function ContactForm() {
     required: true
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "mono-label"
+  }, "Email"), /*#__PURE__*/React.createElement("input", {
+    name: "email",
+    type: "email",
+    style: inputStyle,
+    value: form.email,
+    onChange: update("email"),
+    required: true
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "mono-label"
   }, "Company"), /*#__PURE__*/React.createElement("input", {
     name: "company",
     style: inputStyle,
@@ -3609,18 +3689,12 @@ function ContactForm() {
     required: true
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "mono-label"
-  }, "What are you working on?"), /*#__PURE__*/React.createElement("input", {
-    name: "working_on",
-    style: inputStyle,
-    value: form.working_on,
-    onChange: update("working_on")
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "mono-label"
-  }, "What's not working today?"), /*#__PURE__*/React.createElement("input", {
-    name: "whats_not",
-    style: inputStyle,
-    value: form.whats_not,
-    onChange: update("whats_not")
+  }, "What are you working on \u2014 and what isn't working today?"), /*#__PURE__*/React.createElement("textarea", {
+    name: "context",
+    rows: 4,
+    style: { ...inputStyle, resize: "vertical", fontFamily: "var(--font-body)", lineHeight: 1.5 },
+    value: form.context,
+    onChange: update("context")
   }))), errorMsg && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
@@ -3670,36 +3744,14 @@ function Contact() {
       margin: "20px 0 24px",
       color: "var(--paper)"
     }
-  }, "Let's build ", /*#__PURE__*/React.createElement("span", {
+  }, "Let's build something", /*#__PURE__*/React.createElement("br", null), "that ", /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "var(--font-italic)",
       fontStyle: "italic",
       fontWeight: 400,
-      color: "var(--paper)"
+      color: "#B9C7A8"
     }
-  }, "something"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      position: "relative",
-      display: "inline-block",
-      fontFamily: "var(--font-italic)",
-      fontStyle: "italic",
-      fontWeight: 400,
-      color: "#B9C7A8",
-      transform: "rotate(-2.2deg)",
-      transformOrigin: "left center"
-    }
-  }, "that Wurx.", /*#__PURE__*/React.createElement("span", {
-    style: {
-      position: "absolute",
-      left: "-2%",
-      right: "-2%",
-      bottom: "-0.05em",
-      height: "0.14em",
-      background: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 10' preserveAspectRatio='none'><path d='M2 6 Q 50 1 100 5 T 198 4' stroke='%23B9C7A8' stroke-width='2.2' fill='none' stroke-linecap='round'/></svg>\") no-repeat",
-      backgroundSize: "100% 100%",
-      pointerEvents: "none"
-    }
-  }))), /*#__PURE__*/React.createElement("p", {
+  }, "Wurx.")), /*#__PURE__*/React.createElement("p", {
     style: {
       color: "rgba(244,241,232,0.82)",
       fontSize: 19,
@@ -3834,18 +3886,7 @@ function Footer() {
     style: {
       color: "rgba(244,241,232,0.8)"
     }
-  }, "InfluxLead \u2197"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "mono-label",
-    style: {
-      color: "rgba(244,241,232,0.5)",
-      marginBottom: 14
-    }
-  }, "Address"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14,
-      lineHeight: 1.7
-    }
-  }, "RootWurx", /*#__PURE__*/React.createElement("br", null), "PO Box 271", /*#__PURE__*/React.createElement("br", null), "Ada, MI 49301"))), /*#__PURE__*/React.createElement("div", {
+  }, "InfluxLead \u2197")))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 48,
       paddingTop: 20,
@@ -3963,7 +4004,7 @@ function App() {
   } = useTweaks();
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Nav, null), /*#__PURE__*/React.createElement(Hero, {
     headlineVariant: tweaks.headline
-  }), /*#__PURE__*/React.createElement(Work, null), /*#__PURE__*/React.createElement(TiltedTruth, null), /*#__PURE__*/React.createElement(Approach, null), /*#__PURE__*/React.createElement(Process, null), /*#__PURE__*/React.createElement(Fields, null), /*#__PURE__*/React.createElement(AboutNik, null), /*#__PURE__*/React.createElement(FAQ, null), /*#__PURE__*/React.createElement(Contact, null), /*#__PURE__*/React.createElement(Footer, null), /*#__PURE__*/React.createElement(TweaksPanel, {
+  }), /*#__PURE__*/React.createElement(Work, null), /*#__PURE__*/React.createElement(Approach, null), /*#__PURE__*/React.createElement(Process, null), /*#__PURE__*/React.createElement(Fields, null), /*#__PURE__*/React.createElement(FAQ, null), /*#__PURE__*/React.createElement(Contact, null), /*#__PURE__*/React.createElement(Footer, null), /*#__PURE__*/React.createElement(TweaksPanel, {
     active: active,
     tweaks: tweaks,
     setTweaks: setTweaks
